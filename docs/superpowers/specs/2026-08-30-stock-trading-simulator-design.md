@@ -140,6 +140,7 @@
 - 端口:服务 8090;开发模式 Vite 5173 代理 /api
 - 行情轮询:前端 5 秒(自选+持仓+当前个股合并批量请求),标签页隐藏时暂停(visibilitychange)
 - 交易引擎为纯函数:`(订单, 最新行情, 账户状态, 日历) → 成交结果 | 拒绝原因`,服务层负责加锁串行下单与落盘
+- **前端视觉设计流程**:先用 Google Stitch(stitch.withgoogle.com)生成五个页面的高保真设计稿(设计系统 DESIGN.md + 各页提示词存于 `docs/stitch/`);通过 Stitch MCP(`@_davideast/stitch-mcp`,get_screen_image / get_screen_code)拉取设计稿截图与代码作为实现参照。组件结构仍按本架构实现(Stitch 产出仅作视觉基准,不直接采用其代码框架)
 
 ## 6. API 设计(REST,JSON)
 
