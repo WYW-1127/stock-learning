@@ -1,5 +1,8 @@
 # A股模拟炒股学习网页 — 设计文档
 
+> ⚠️ **历史存档**:本文档为头脑风暴阶段的原始设计稿,不再更新。
+> 维护中的版本已拆分为:[../../requirements.md](../../requirements.md)(需求)与 [../../architecture.md](../../architecture.md)(架构)。
+
 日期:2026-08-30
 状态:已经用户确认(brainstorming 会话)
 
