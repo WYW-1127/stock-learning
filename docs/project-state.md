@@ -4,7 +4,7 @@
 
 ## 一句话现状
 
-文档与设计阶段完成,已上传 GitHub;**下一步:写实施计划,然后搭建项目骨架**。
+T1 项目骨架完成并通过验收(服务 8090 可启动、前端可构建、页面可访问);**下一步:T2 交易引擎 + 单元测试**。
 
 ## 已完成
 
@@ -12,17 +12,18 @@
 - [x] 技术方案:Node 全栈(方案一),真实行情,完整交易规则,随时可交易
 - [x] Stitch 设计稿:5 屏已拉取审阅(`design/stitch/`),4 处已知偏差实现时修正(见 requirements.md §6)
 - [x] Stitch MCP 接入:代理补丁 + 包装脚本(仓库外 `~/.zcode/stitch-proxy/`),doctor 体检通过
-- [x] 文档体系:README / AGENTS / requirements / architecture / 本文件
+- [x] 文档体系:README / AGENTS / requirements / architecture / 本文件 / implementation-plan
 - [x] GitHub 仓库:`WYW-1127/stock-learning`(私有),main 分支已推送
+- [x] **T1 项目骨架**:Express 服务(8090,静态托管+SPA回退+status接口)、Vue3 壳(设计令牌/三tab布局/4页桩)、内容(25条术语+6篇课程)、启动.bat;安装/构建/启动验收通过
 
 ## 下一步(按序)
 
-1. **写实施计划** — 按 architecture.md 拆任务排期(建议顺序:骨架 → 交易引擎+测试 → 行情服务 → 前端五屏 → 联调)
-2. 搭建项目骨架:server/ + web/ + content/ + 启动.bat + 根 package.json 工作区脚本
-3. 交易引擎纯函数 + vitest 全量单测(测试清单见 architecture.md §9)
-4. 行情服务:腾讯实时(GBK 解码)+ 东财 K线/搜索 + 缓存重试
-5. 前端五屏按设计稿实现(klinecharts 渲染真实 K线)
-6. 联调 + 手动测试清单验收
+1. **T2 交易引擎 + 单元测试**(当前任务)— server/src/engine/{fees,validate,execute,calendar}.js 纯函数 + vitest 全量用例(清单见 architecture.md §9);`npm test` 全绿为验收
+2. T3 本地存储:store.js 原子写/备份/损坏恢复/重置 + 测试
+3. T4 行情服务:腾讯实时(GBK)+ 东财 K线/搜索 + 缓存重试 + mock 测试
+4. T5 API 层组装:全部路由 + 下单串行队列
+5. T6 前端五屏按设计稿实现(klinecharts 真实K线)
+6. T7 联调收尾:启动.bat 打磨、手动清单回归
 
 ## 待用户事项
 
@@ -53,3 +54,4 @@
 ### 更新日志
 
 - 2026-08-30:建立文档体系;完成设计/审稿/接入/GitHub 上传;下一步写实施计划
+- 2026-08-30:完成实施计划(T1-T7)+ T1 项目骨架;下一步 T2 交易引擎+单测

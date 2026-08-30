@@ -1,0 +1,80 @@
+/* 设计令牌 — 来源 docs/stitch/DESIGN.md */
+:root {
+  --canvas: #fafafa;        /* Paper Canvas 页面底色 */
+  --surface: #ffffff;       /* Pure Surface 卡片/面板 */
+  --ink: #18181b;           /* Charcoal Ink 主文字 */
+  --muted: #71717a;         /* Muted Steel 次要文字/平盘 */
+  --border: rgba(24, 24, 27, 0.08);  /* Whisper Border */
+  --accent: #c2402a;        /* Cinnabar 朱红主色 */
+  --up: #d64545;            /* 涨/买入(红) */
+  --down: #1e7a5a;          /* 跌/卖出(绿) */
+  --notice: #b45309;        /* Amber Notice 盘后/提醒 */
+  --up-tint: rgba(214, 69, 69, 0.08);
+  --down-tint: rgba(30, 122, 90, 0.08);
+  --amber-tint: rgba(180, 83, 9, 0.06);
+
+  --font-ui: 'Satoshi', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'SFMono-Regular', Consolas, 'Courier New', monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font-ui);
+  background: var(--canvas);
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* 数字一律等宽 */
+.num, .price, td.num, .mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 涨跌语义色 */
+.up { color: var(--up); }
+.down { color: var(--down); }
+.flat { color: var(--muted); }
+
+/* 通用卡片 */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+/* 按钮 */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 20px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.btn:active { transform: translateY(1px); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-buy { background: var(--up); color: #fff; }
+.btn-sell { background: var(--down); color: #fff; }
+.btn-ghost { background: var(--surface); border-color: var(--border); color: var(--ink); }
+
+/* 术语卡虚线下划线触发样式 */
+.term-trigger {
+  cursor: pointer;
+  text-decoration: underline dotted var(--muted);
+  text-underline-offset: 3px;
+}
+
+/* 页面容器 */
+.page {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 24px;
+}
