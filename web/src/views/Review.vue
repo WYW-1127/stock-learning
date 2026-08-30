@@ -174,7 +174,7 @@ function startTour() {
   padding: 10px 18px; border-bottom: 1px solid var(--border); text-align: right;
 }
 .table th.tl { text-align: left; }
-.table td { padding: 12px 18px; border-bottom: 1px solid var(--border); }
+.table td { padding: 12px 18px; border-bottom: 1px solid var(--border); text-align: right; }
 .table tbody tr:hover { background: #f4f4f5; }
 .sub-code { font-size: 11px; color: var(--muted); }
 .note { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--muted); font-size: 13px; }
@@ -221,6 +221,12 @@ function startTour() {
   font-family: var(--font-mono); font-size: 12.5px; background: #f4f4f5;
   border-radius: 4px; padding: 1px 5px;
 }
+/* 围栏代码块(ASCII 示意图):等宽对齐 + 横向滚动,内部 code 重置行内样式 */
+.lesson-md :deep(pre) {
+  background: #f7f7f8; border: 1px solid var(--border); border-radius: 8px;
+  padding: 12px 14px; margin: 14px 0; overflow-x: auto; line-height: 1.45;
+}
+.lesson-md :deep(pre code) { background: none; padding: 0; border-radius: 0; font-size: 12.5px; }
 .lesson-md :deep(hr) { border: none; border-top: 1px dashed var(--border); margin: 20px 0; }
 .lesson-md :deep(em) { color: var(--muted); }
 .term-search { padding: 12px 18px 0; }

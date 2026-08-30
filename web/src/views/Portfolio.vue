@@ -217,7 +217,7 @@ async function doReset() {
 }
 .table th.tl { text-align: left; }
 .table th.tc, .table td.tc { text-align: center; }
-.table td { padding: 12px 18px; border-bottom: 1px solid var(--border); }
+.table td { padding: 12px 18px; border-bottom: 1px solid var(--border); text-align: right; }
 .table tbody tr:hover { background: #f4f4f5; }
 .table tbody tr { cursor: default; }
 #none { cursor: default; }
