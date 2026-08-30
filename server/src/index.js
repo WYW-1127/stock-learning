@@ -24,5 +24,6 @@ app.use((req, res, next) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`模拟盘 · 股票学习 服务已启动: http://localhost:${PORT}`);
+  // 控制台可能是 GBK 代码页,启动提示用 ASCII 避免乱码
+  console.log(`Server ready: http://localhost:${PORT}`);
 });

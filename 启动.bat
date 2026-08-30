@@ -1,29 +1,30 @@
 @echo off
-chcp 65001 >nul
+rem ±¾ÎÄ¼þ±ØÐë±£´æÎª GBK ±àÂë + CRLF »»ÐÐ(cmd ÖÐÎÄ»·¾³±ê×¼),ÎðÓÃ±à¼­Æ÷Ö±½Ó¸Ä»Ø UTF-8
 cd /d %~dp0
-title æ¨¡æ‹Ÿç›˜ Â· è‚¡ç¥¨å­¦ä¹ 
+title Ä£ÄâÅÌ ¡¤ ¹ÉÆ±Ñ§Ï°
 
 where node >nul 2>nul
 if errorlevel 1 (
-  echo [é”™è¯¯] æœªæ£€æµ‹åˆ° Node.js,è¯·å…ˆå®‰è£…:https://nodejs.org/
+  echo [´íÎó] Î´¼ì²âµ½ Node.js,ÇëÏÈ°²×°:https://nodejs.org/
   pause
   exit /b 1
 )
 
 if not exist "server\node_modules" (
-  echo [åˆå§‹åŒ–] å®‰è£…åŽç«¯ä¾èµ–...
+  echo [³õÊ¼»¯] °²×°ºó¶ËÒÀÀµ,Ê×´ÎÐèÒª¼¸·ÖÖÓ...
   call npm --prefix server install
-  if errorlevel 1 ( echo [é”™è¯¯] åŽç«¯ä¾èµ–å®‰è£…å¤±è´¥ & pause & exit /b 1 )
+  if errorlevel 1 ( echo [´íÎó] ºó¶ËÒÀÀµ°²×°Ê§°Ü & pause & exit /b 1 )
 )
 
 if not exist "web\dist" (
-  echo [åˆå§‹åŒ–] å®‰è£…å‰ç«¯ä¾èµ–å¹¶æž„å»º...
+  echo [³õÊ¼»¯] °²×°Ç°¶ËÒÀÀµ²¢¹¹½¨Ò³Ãæ...
   call npm --prefix web install
   call npm --prefix web run build
-  if errorlevel 1 ( echo [é”™è¯¯] å‰ç«¯æž„å»ºå¤±è´¥ & pause & exit /b 1 )
+  if errorlevel 1 ( echo [´íÎó] Ç°¶Ë¹¹½¨Ê§°Ü & pause & exit /b 1 )
 )
 
-echo [å¯åŠ¨] æœåŠ¡è¿è¡Œä¸­,æµè§ˆå™¨å°†è‡ªåŠ¨æ‰“å¼€ http://localhost:8090
+echo [Æô¶¯] ·þÎñÔËÐÐÖÐ,ä¯ÀÀÆ÷½«×Ô¶¯´ò¿ª http://localhost:8090
+echo        Èôä¯ÀÀÆ÷Î´×Ô¶¯´ò¿ª,ÇëÊÖ¶¯·ÃÎÊ¸ÃµØÖ·;¹Ø±Õ±¾´°¿Ú¼´ÍË³ö³ÌÐò
 start "" cmd /c "timeout /t 2 >nul && start http://localhost:8090"
 node server\src\index.js
 pause

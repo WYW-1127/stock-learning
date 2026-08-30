@@ -43,3 +43,6 @@
 - 任何密钥/token 不入库(Stitch key 在仓库外 `~/.zcode`),不在输出中显示密钥
 - 不手工编辑 `data/` 下的运行时数据
 - 仓库保持私有,公开前必须征得用户同意
+- **`启动.bat` 必须保持 GBK 编码 + CRLF 换行**:用 Write 工具改完必须执行
+  `sed -i 's/$/\r/' 启动.bat && iconv -f UTF-8 -t GBK 启动.bat > /tmp/b && mv /tmp/b 启动.bat`,
+  否则中文版 cmd 解析为乱码命令;服务端向控制台输出的日志一律用 ASCII
