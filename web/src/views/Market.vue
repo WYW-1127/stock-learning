@@ -108,6 +108,7 @@ const others = computed(() => indices.value.filter((i) => i.symbol !== primary.v
 .empty { padding: 48px 24px; text-align: center; color: var(--muted); }
 .empty-icon { font-size: 32px; margin-bottom: 8px; }
 .table { width: 100%; border-collapse: collapse; }
+.table th, .table td { white-space: nowrap; }
 .table th {
   font-size: 12px; color: var(--muted); font-weight: 500; letter-spacing: 0.05em;
   padding: 10px 18px; border-bottom: 1px solid var(--border); text-align: right;

@@ -211,6 +211,8 @@ async function doReset() {
 .muted { color: var(--muted); font-size: 12px; }
 .empty { padding: 40px; text-align: center; color: var(--muted); display: flex; flex-direction: column; gap: 12px; align-items: center; }
 .table { width: 100%; border-collapse: collapse; }
+/* 表格单元格一律不换行:时间/金额等内容折行会打乱行高与列对齐;长文本列(备注)用省略号 */
+.table th, .table td { white-space: nowrap; }
 .table th {
   font-size: 12px; color: var(--muted); font-weight: 500; letter-spacing: 0.05em;
   padding: 10px 18px; border-bottom: 1px solid var(--border); text-align: right;

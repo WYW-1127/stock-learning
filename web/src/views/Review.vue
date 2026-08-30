@@ -169,6 +169,7 @@ function startTour() {
 .empty { padding: 32px 24px; text-align: center; color: var(--muted); font-size: 13px; }
 .empty.small { padding: 16px; }
 .table { width: 100%; border-collapse: collapse; }
+.table th, .table td { white-space: nowrap; }
 .table th {
   font-size: 12px; color: var(--muted); font-weight: 500; letter-spacing: 0.05em;
   padding: 10px 18px; border-bottom: 1px solid var(--border); text-align: right;
