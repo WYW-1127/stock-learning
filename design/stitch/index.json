@@ -1,0 +1,7 @@
+[
+  { "file": "01-market-home", "page": "行情首页", "screenId": "4fbb93d5ec30418ebb203c60fb6dd00d" },
+  { "file": "02-stock-detail", "page": "个股详情(贵州茅台)", "screenId": "2731eef86a4c426a9ee4cff86830e062" },
+  { "file": "03-order-panel", "page": "下单面板(买入弹窗)", "screenId": "e0efb3b2b56c47d3af526556312c2e31" },
+  { "file": "04-portfolio", "page": "持仓与资产", "screenId": "6be77dcf2a5346ea83ca941179abf28e" },
+  { "file": "05-review-learn", "page": "复盘与学习", "screenId": "079b9795e7c04b809dbb3eb624e05318" }
+]

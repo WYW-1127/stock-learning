@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>A-Share Simulator - Buy Order Modal</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&amp;family=Noto+Sans:wght@400;600&amp;family=Plus+Jakarta+Sans:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary": "#5f5e61",
+                        "tertiary-container": "#00769d",
+                        "surface-tint": "#ad311d",
+                        "on-secondary-fixed": "#1b1b1e",
+                        "tertiary-fixed-dim": "#7dd0fb",
+                        "data-up-red": "#D64545",
+                        "primary-fixed": "#ffdad3",
+                        "on-tertiary-container": "#e2f3ff",
+                        "surface-container-lowest": "#ffffff",
+                        "outline": "#8d716b",
+                        "surface-dim": "#edd5d0",
+                        "surface-variant": "#f6ddd8",
+                        "inverse-on-surface": "#ffede9",
+                        "outline-variant": "#e1bfb9",
+                        "secondary-container": "#e4e1e6",
+                        "on-secondary": "#ffffff",
+                        "error": "#ba1a1a",
+                        "on-surface-variant": "#59413c",
+                        "primary-fixed-dim": "#ffb4a6",
+                        "amber-notice": "#B45309",
+                        "on-surface": "#251816",
+                        "on-secondary-container": "#656467",
+                        "surface-bright": "#fff8f6",
+                        "on-error-container": "#93000a",
+                        "surface-container": "#ffe9e5",
+                        "paper-canvas": "#FAFAFA",
+                        "background": "#fff8f6",
+                        "on-primary": "#ffffff",
+                        "primary-container": "#c2402a",
+                        "pure-surface": "#FFFFFF",
+                        "tertiary": "#005c7b",
+                        "on-primary-fixed-variant": "#8c1807",
+                        "on-tertiary-fixed": "#001e2b",
+                        "on-secondary-fixed-variant": "#47464a",
+                        "on-error": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "primary": "#a02814",
+                        "secondary-fixed": "#e4e1e6",
+                        "on-background": "#251816",
+                        "surface-container-highest": "#f6ddd8",
+                        "on-primary-fixed": "#3f0300",
+                        "on-tertiary-fixed-variant": "#004d67",
+                        "surface-container-low": "#fff0ee",
+                        "surface": "#fff8f6",
+                        "on-tertiary": "#ffffff",
+                        "inverse-primary": "#ffb4a6",
+                        "on-primary-container": "#ffece9",
+                        "surface-container-high": "#fce3de",
+                        "tertiary-fixed": "#c2e8ff",
+                        "inverse-surface": "#3c2d2a",
+                        "data-down-jade": "#1E7A5A",
+                        "whisper-border": "rgba(24,24,27,0.08)",
+                        "muted-steel": "#71717A",
+                        "secondary-fixed-dim": "#c8c5ca",
+                        "charcoal-ink": "#18181B"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "24px",
+                        "nav-height": "56px",
+                        "max-width": "1400px",
+                        "margin": "32px",
+                        "order-panel": "420px"
+                    },
+                    "fontFamily": {
+                        "data-table": ["JetBrains Mono", "monospace"],
+                        "data-lg": ["JetBrains Mono", "monospace"],
+                        "body-base": ["Noto Sans", "sans-serif"],
+                        "label-caps": ["Noto Sans", "sans-serif"],
+                        "headline-md": ["Plus Jakarta Sans", "sans-serif"],
+                        "body-sm": ["Noto Sans", "sans-serif"],
+                        "caption-mono": ["JetBrains Mono", "monospace"],
+                        "headline-lg": ["Plus Jakarta Sans", "sans-serif"]
+                    },
+                    "fontSize": {
+                        "data-table": ["14px", { "lineHeight": "1.0", "fontWeight": "400" }],
+                        "data-lg": ["24px", { "lineHeight": "1.2", "fontWeight": "600" }],
+                        "body-base": ["15px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "label-caps": ["12px", { "lineHeight": "1.0", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "headline-md": ["22px", { "lineHeight": "1.3", "fontWeight": "600" }],
+                        "body-sm": ["14px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "caption-mono": ["13px", { "lineHeight": "1.4", "fontWeight": "400" }],
+                        "headline-lg": ["28px", { "lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer utilities {
+            .dotted-leader {
+                background-image: radial-gradient(circle, var(--tw-colors-muted-steel) 1px, transparent 1px);
+                background-position: bottom;
+                background-size: 8px 2px;
+                background-repeat: repeat-x;
+            }
+        }
+    </style>
+</head>
+<body class="bg-paper-canvas font-body-base text-on-surface h-screen overflow-hidden flex relative">
+<!-- Blurred Background (Screen 5 placeholder) -->
+<div class="absolute inset-0 z-0 overflow-hidden pointer-events-none" data-alt="A detailed digital interface showing a complex stock market terminal screen with glowing green and red charts on a light background. High information density, modern corporate minimalism. The focus is on a sophisticated layout with multiple data panes, clean typography, and a calm, trustworthy aesthetic." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuC22W4gsV6s3Y1ZKWYYB5KyABZeQl751b-dIt5bWkVuwyP73Eh62eCU8qKFJMToNSiQvYy0_ofMwG0kSk2vlSLcnWoV0lkaEQtfBXuqk8YsJdH0ZKdSqMf6wRcN_v6A2yJruDZKoSm8p351PUDzI2lDWdQbp_qyOhIp7YzpFukHt_7fFhj8j_Kdm6BpDneJ-98Twt3B7k5iBAtrZKwgrJRy4q4aEYli_B6kI0klsZMYzYetxQavFyWAJw')">
+<div class="absolute inset-0 bg-charcoal-ink opacity-40"></div>
+</div>
+<!-- Main Navigation TopAppBar (from JSON) - Technically hidden behind scrim in reality, but included as structural anchor -->
+<nav class="absolute top-0 w-full z-10 bg-pure-surface h-nav-height border-b border-whisper-border flex justify-between items-center px-margin max-w-max-width mx-auto pointer-events-none opacity-50 hidden md:flex">
+<div class="flex items-center gap-6">
+<span class="font-headline-md text-headline-md font-bold text-primary">A-Share Simulator</span>
+<div class="flex gap-6">
+<a class="text-secondary font-body-base text-body-base hover:text-primary pb-1" href="#">行情</a>
+<a class="text-primary font-body-base text-body-base border-b-2 border-primary font-bold pb-1" href="#">持仓</a>
+<a class="text-secondary font-body-base text-body-base hover:text-primary pb-1" href="#">复盘</a>
+<a class="text-secondary font-body-base text-body-base hover:text-primary pb-1" href="#">学习</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<span class="font-data-table text-data-table">¥1,000,000.00</span>
+<span class="material-symbols-outlined text-secondary hover:text-primary cursor-pointer">account_balance_wallet</span>
+<span class="material-symbols-outlined text-secondary hover:text-primary cursor-pointer">notifications</span>
+<span class="material-symbols-outlined text-secondary hover:text-primary cursor-pointer">account_circle</span>
+</div>
+</nav>
+<!-- Modal Container -->
+<div class="relative z-20 w-full h-full flex justify-end">
+<!-- Order Panel Modal (Right Drawer) -->
+<aside class="w-full md:w-order-panel bg-pure-surface h-full shadow-lg flex flex-col transform transition-transform duration-300 ease-in-out border-l border-whisper-border">
+<!-- Header -->
+<header class="p-6 border-b border-whisper-border flex items-center justify-between">
+<div class="flex items-center gap-3">
+<h2 class="font-headline-md text-headline-md text-data-up-red font-bold">买入 贵州茅台</h2>
+<span class="border border-whisper-border text-muted-steel font-caption-mono text-caption-mono px-2 py-0.5 rounded">sh600519</span>
+</div>
+<button class="text-muted-steel hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined">close</span>
+</button>
+</header>
+<!-- Context Row -->
+<div class="px-6 py-4 bg-surface-container-low border-b border-whisper-border">
+<p class="font-body-sm text-body-sm text-muted-steel flex items-center gap-2">
+<span>当前价 <span class="font-data-table text-data-table text-on-surface">¥1,456.00</span></span>
+<span class="w-1 h-1 rounded-full bg-muted-steel"></span>
+<span>可用资金 <span class="font-data-table text-data-table text-on-surface">¥82,410.55</span></span>
+</p>
+</div>
+<!-- Body Scrollable Area -->
+<div class="flex-1 overflow-y-auto p-6 flex flex-col gap-6">
+<!-- Segmented Tabs -->
+<div class="flex rounded border border-whisper-border bg-paper-canvas p-1">
+<button class="flex-1 py-2 text-center rounded bg-pure-surface shadow-sm text-data-up-red font-body-base text-body-base font-bold">买入</button>
+<button class="flex-1 py-2 text-center rounded text-muted-steel hover:text-on-surface transition-colors font-body-base text-body-base">卖出</button>
+</div>
+<!-- Price Input -->
+<div class="flex flex-col gap-2">
+<label class="font-label-caps text-label-caps text-muted-steel uppercase">买入价格 (元)</label>
+<div class="relative">
+<input class="w-full h-[44px] px-3 font-data-table text-data-table text-on-surface bg-pure-surface border border-whisper-border rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-right" type="text" value="1,456.00"/>
+</div>
+<div class="flex justify-between font-caption-mono text-caption-mono text-muted-steel mt-1">
+<span>涨停价 <span class="text-data-up-red">¥1,601.60</span></span>
+<span>跌停价 <span class="text-data-down-jade">¥1,310.40</span></span>
+</div>
+</div>
+<!-- Quantity Input -->
+<div class="flex flex-col gap-2">
+<label class="font-label-caps text-label-caps text-muted-steel uppercase">买入数量 (股)</label>
+<div class="relative">
+<input class="w-full h-[44px] px-3 font-data-table text-data-table text-on-surface bg-pure-surface border border-whisper-border rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-right" type="text" value="100"/>
+</div>
+<p class="font-caption-mono text-caption-mono text-muted-steel mt-1 text-right">1手 = 100股</p>
+<!-- Quick Buttons -->
+<div class="grid grid-cols-4 gap-2 mt-2">
+<button class="h-8 border border-whisper-border rounded text-body-sm font-body-sm text-muted-steel hover:bg-surface-container-low hover:text-on-surface transition-colors">1手</button>
+<button class="h-8 border border-whisper-border rounded text-body-sm font-body-sm text-muted-steel hover:bg-surface-container-low hover:text-on-surface transition-colors">5手</button>
+<button class="h-8 border border-whisper-border rounded text-body-sm font-body-sm text-muted-steel hover:bg-surface-container-low hover:text-on-surface transition-colors">半仓</button>
+<button class="h-8 border border-whisper-border rounded text-body-sm font-body-sm text-muted-steel hover:bg-surface-container-low hover:text-on-surface transition-colors">全仓</button>
+</div>
+</div>
+<!-- Fee Preview Box -->
+<div class="bg-surface-container-low border border-whisper-border rounded p-4 flex flex-col gap-3 mt-4">
+<div class="flex justify-between items-end relative">
+<span class="font-body-sm text-body-sm text-muted-steel bg-surface-container-low pr-2 relative z-10">成交金额</span>
+<div class="absolute bottom-[4px] left-0 right-0 dotted-leader z-0"></div>
+<span class="font-data-table text-data-table text-on-surface bg-surface-container-low pl-2 relative z-10">¥145,600.00</span>
+</div>
+<div class="flex justify-between items-end relative">
+<span class="font-body-sm text-body-sm text-muted-steel bg-surface-container-low pr-2 relative z-10">佣金 <span class="material-symbols-outlined text-[14px] align-middle cursor-help border-b border-dotted border-muted-steel pb-[1px]" title="Terminology: Commission fee charged by broker">info</span></span>
+<div class="absolute bottom-[4px] left-0 right-0 dotted-leader z-0"></div>
+<span class="font-data-table text-data-table text-on-surface bg-surface-container-low pl-2 relative z-10">¥36.40</span>
+</div>
+<div class="flex justify-between items-end relative">
+<span class="font-body-sm text-body-sm text-muted-steel bg-surface-container-low pr-2 relative z-10">过户费</span>
+<div class="absolute bottom-[4px] left-0 right-0 dotted-leader z-0"></div>
+<span class="font-data-table text-data-table text-on-surface bg-surface-container-low pl-2 relative z-10">¥1.46</span>
+</div>
+<div class="border-t border-whisper-border pt-2 mt-1 flex justify-between items-end">
+<span class="font-body-base text-body-base font-bold text-on-surface">合计扣款</span>
+<span class="font-data-lg text-data-lg text-data-up-red">¥145,637.86</span>
+</div>
+</div>
+</div>
+<!-- Footer / Actions -->
+<div class="p-6 border-t border-whisper-border bg-pure-surface flex flex-col gap-4">
+<!-- Validation Warning -->
+<div class="bg-amber-notice/10 border border-amber-notice/20 rounded p-3 flex gap-2 items-start">
+<span class="material-symbols-outlined text-amber-notice text-[18px] mt-0.5">warning</span>
+<p class="font-body-sm text-body-sm text-amber-notice">现金不足:合计需 ¥145,637.86,可用 ¥82,410.55。试试更少的数量。</p>
+</div>
+<button class="w-full h-[48px] bg-data-up-red text-on-primary font-body-base text-body-base font-bold rounded flex items-center justify-center hover:bg-opacity-90 active:translate-y-[1px] transition-all">
+                    确认买入
+                </button>
+</div>
+</aside>
+</div>
+</body></html>
