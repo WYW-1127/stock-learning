@@ -150,7 +150,17 @@ app.use((req, res, next) => {
   next();
 });
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   // 控制台可能是 GBK 代码页,启动提示用 ASCII 避免乱码
   console.log(`Server ready: http://localhost:${PORT}`);
+});
+// 端口被旧实例占用时给出人话提示(启动.bat 场景常见),不吐一堆堆栈
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.log(`[error] Port ${PORT} is already in use.`);
+    console.log('[error] Close the old program window (or run: taskkill /F /IM node.exe) and start again.');
+  } else {
+    console.log(`[error] ${err.message}`);
+  }
+  process.exit(1);
 });
