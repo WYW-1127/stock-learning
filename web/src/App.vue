@@ -1,8 +1,25 @@
 <script setup>
-import { ref } from 'vue';
+import { onMounted, watch } from 'vue';
+import { useRoute } from 'vue-router';
+import { useMarketStore } from './stores/market.js';
+import { useAccountStore } from './stores/account.js';
+import { fmtMoney } from './format.js';
+import GuidedTour from './components/GuidedTour.vue';
 
-// 可用资金占位:T5 接通 /api/account 后由后端提供
-const cash = ref('--');
+const route = useRoute();
+const market = useMarketStore();
+const account = useAccountStore();
+
+onMounted(() => {
+  market.init();
+  account.refresh();
+});
+// 路由切换时刷新现金/持仓(下单成交后的兜底刷新也走这里)
+watch(() => route.path, () => account.refresh());
+
+function startTour() {
+  window.dispatchEvent(new Event('start-tour'));
+}
 </script>
 
 <template>
@@ -15,8 +32,9 @@ const cash = ref('--');
         <RouterLink to="/review" class="tab">复盘与学习</RouterLink>
       </nav>
       <div class="right">
-        <span class="cash num">可用资金 ¥{{ cash }}</span>
-        <button class="btn btn-ghost btn-guide">新手引导</button>
+        <span v-if="market.status.mode === 'afterHours'" class="mode-badge">盘后模式</span>
+        <span class="cash num">可用资金 {{ fmtMoney(account.cash) }}</span>
+        <button class="btn btn-ghost btn-guide" @click="startTour">新手引导</button>
       </div>
     </header>
 
@@ -26,8 +44,10 @@ const cash = ref('--');
 
     <footer class="statusbar">
       <span>模拟盘 · 不涉及真实资金</span>
-      <span>数据每5秒刷新 · 行情来源:腾讯/东方财富</span>
+      <span>数据每5秒刷新 · 行情来源:腾讯</span>
     </footer>
+
+    <GuidedTour />
   </div>
 </template>
 
@@ -59,6 +79,11 @@ const cash = ref('--');
 .tab.router-link-active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
 .right { display: flex; align-items: center; gap: 12px; }
 .cash { font-size: 13px; color: var(--ink); }
+.mode-badge {
+  font-size: 12px; color: var(--notice);
+  background: var(--amber-tint); border: 1px solid rgba(180, 83, 9, 0.25);
+  border-radius: 4px; padding: 1px 8px;
+}
 .btn-guide { min-height: 36px; padding: 0 14px; font-size: 13px; }
 .main { flex: 1; }
 .statusbar {

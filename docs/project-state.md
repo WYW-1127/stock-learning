@@ -4,7 +4,7 @@
 
 ## 一句话现状
 
-T5 API 层完成(76/76 单测全绿 + 14 项全流程 curl 验收全过);**下一步:T6 前端五屏按设计稿实现**。
+T6 前端五屏完成(浏览器实测五页全通,买入成交链路走通);**下一步:T7 联调收尾(启动.bat 打磨 + 手动清单回归)**。
 
 ## 已完成
 
@@ -19,14 +19,15 @@ T5 API 层完成(76/76 单测全绿 + 14 项全流程 curl 验收全过);**下�
 - [x] **T3 本地存储**:server/src/store.js — 五文件(account/positions/trades/watchlist/snapshots)读写;临时文件+rename 原子写(Windows EPERM 重试兜底);写前 .bak;init() 损坏自动从 .bak 恢复/回退默认并返回 notice;reset(保留自选);DATA_DIR 环境变量可覆盖目录;index.js 启动时 init 并 ASCII 输出恢复提示;vitest 13 用例全绿。实现决策:.bak 存"上一次写入前"内容(只能回退一步);流水 addTrade 追加、getTrades(limit) 最新在前;自选默认 ["sh600519","sz000001"]
 - [x] **T4 行情服务**:server/src/market.js — 腾讯实时报价(GBK 解码、五档、涨跌停、批量 60 自动分批、3s TTL 按只缓存)、腾讯 ifzq K线(日/周前复权、日K当日缓存、指数无 qfqday 回退 day 键)、腾讯 minute 分时(差分分钟量、均价线)、腾讯 smartbox 搜索(只留沪深A股 GP-A、\uXXXX 名称解码、board 与引擎同源);fetch 可注入工厂便于 mock;vitest 15 用例全绿。**重大数据源变更**:原计划东财 K线/搜索,实测 push2his 本机直连不可达(代理开关均如此)、suggest 对 Node fetch 的 TLS 指纹返回无股票数据的 JSONP 分支(curl 正常),全部切腾讯,详见 architecture.md §1 决策记录与 §8 环境备忘
 - [x] **T5 API 层组装**:content.js(术语/课程读取,含课程列表与 id 白名单防穿越)、review.js(平仓批次 FIFO/加权持有天数/统计,纯函数+10 单测)、service.js(盘后判定+交易日解析、下单内存串行队列、账户视图含可用量/成本价/浮盈、当日资产快照)、index.js 挂全部 §4 路由+SPA 回退;**验收 14/14 全过**(临时 DATA_DIR 预置批次,买入→T+1 人话拒绝→卖出 FIFO 盈亏→账户→流水→复盘→重置→内容;脚本留 server/scripts/t5-verify.mjs 可复跑)。**引擎修正**:consumeLots 部分平仓后剩余批次 cost 按比例缩减(原整批成本导致浮盈虚高),全量回归通过
+- [x] **T6 前端五屏**:api/format/fees 工具 + 三 Pinia store(行情 5s 轮询 visibilitychange 暂停/账户/内容)+ 组件(TermPopover 术语卡、SearchBox 联想、GuidedTour 6 步导览 localStorage、KLineChart klinecharts、OrderPanel 下单抽屉含费用预览/人话拒绝/成交回执)+ 五屏(行情指数主次卡/自选/搜索;个股 60/40 布局+分时日K周K+五档量条+指标术语卡;持仓摘要+SVG资产曲线+T+1角标+历史+重置二次确认;复盘统计+平仓表+课程阅读进度+术语辞典搜索)+ App 壳(现金接store/盘后角标/引导按钮);服务端补 watchlist CRUD 路由。**浏览器实测**:五页渲染无错、K线蜡烛/MA/成交量正常红涨绿跌、买入平安银行 100 股全链路通(回执/现金/持仓/角标)。**两个坑**:①klinecharts v10 移除 applyNewData/setPriceVolumePrecision,须用 setDataLoader+setSymbol/setPeriod 重写;②T+1 可用量前端曾按自然日算,与后端交易日口径在周末盘后不一致(页面显示可卖、下单被拒),已统一为交易日口径(决策记录已修正)
 
 ## 下一步(按序)
 
-1. **T6 前端五屏(当前任务)**— 按 design/stitch/*.jpg 实现:行情页(指数卡/自选/搜索)、个股页(klinecharts 真实K线/五档/术语卡)、下单面板(费用预览/校验回显/成交回执)、持仓页(摘要+曲线/持仓/历史/重置)、复盘学习页;5 秒轮询+页面隐藏暂停;盘后角标;新手引导
-2. T7 联调收尾:启动.bat 打磨、手动清单回归
+1. **T7 联调收尾(当前任务)**— 启动.bat 打磨(缺依赖装依赖、缺构建构建、起服务开浏览器);UI 手动清单回归(首次引导/盘后角标/断网横幅/术语卡/复盘统计与手算一致/重置);README 使用说明;周一盘中验证 live 模式与 T+1 解锁
+2. (无)
 
 > T5 验收脚本:`node server/scripts/t5-verify.mjs`(需先以 `DATA_DIR` 指向预置目录起 8092 实例,脚本内有说明注释)。
-> 注意:本机 8090 端口有一个 T1 时期的旧服务实例仍在运行,验证新代码时需重启服务(或换 PORT)。
+> T6 已在默认 data/ 留下一笔真实买入(平安银行 100 股,T+1 锁定至下一交易日),T7 回归时可直接观察解锁;或先重置。
 
 ## 待用户事项
 
@@ -65,3 +66,4 @@ T5 API 层完成(76/76 单测全绿 + 14 项全流程 curl 验收全过);**下�
 - 2026-08-30:完成 T3 本地存储(51 测试全绿,冒烟启动通过);下一步 T4 行情服务
 - 2026-08-30:完成 T4 行情服务(66 测试全绿+真机冒烟);东财 K线/搜索实测不可用,全切腾讯(决策见 architecture.md);下一步 T5 API 层
 - 2026-08-30:完成 T5 API 层(76 测试全绿+14 项流程验收);验收发现并修正引擎 FIFO 剩余批次成本语义;下一步 T6 前端
+- 2026-08-30:完成 T6 前端五屏(浏览器实测+买入链路走通);修复 klinecharts v10 API 适配与 T+1 可用量口径;下一步 T7 联调收尾

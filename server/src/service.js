@@ -78,8 +78,10 @@ export async function getAccountOverview() {
       marketOk = false; // 行情失败:现价字段置 null,页面显示"—",不阻塞账户数据
     }
   }
+  // T+1 可用量必须与下单同一口径(当前交易日):周末盘后买入会回溯到上一交易日,
+  // 若按自然日算会出现"页面显示可卖、下单被 T+1 拒绝"的不一致
+  const { tradeDate } = await getStatus();
   let marketValue = 0;
-  const today = localDateStr(new Date());
   const rows = symbols.map((symbol) => {
     const pos = positions[symbol];
     const total = totalQty(pos);
@@ -89,8 +91,7 @@ export async function getAccountOverview() {
     const value = last != null ? Math.round(total * last * 100) / 100 : null;
     if (value != null) marketValue += value;
     const pnl = value != null ? Math.round((value - cost) * 100) / 100 : null;
-    // T+1 可用量按自然日判定即可:买入日期必是交易日,"早于今天"与"早于当前交易日"等价
-    const avail = availableQty(pos, today);
+    const avail = availableQty(pos, tradeDate);
     return {
       symbol,
       name: pos.name,

@@ -66,6 +66,33 @@ app.get('/api/market/search', wrap(async (req, res) => {
   res.json({ ok: true, list: await market.search(q) });
 }));
 
+// ---- 自选 ----
+app.get('/api/watchlist', wrap(async (req, res) => {
+  res.json({ ok: true, watchlist: store.getWatchlist() });
+}));
+
+app.post('/api/watchlist', wrap(async (req, res) => {
+  const symbol = String(req.body?.symbol || '').toLowerCase();
+  if (!/^[a-z]{2}\d{6}$/.test(symbol)) {
+    return res.json({ ok: false, reason: '股票代码格式不正确' });
+  }
+  const list = store.getWatchlist();
+  if (list.includes(symbol)) return res.json({ ok: true, watchlist: list });
+  if (list.length >= 30) {
+    return res.json({ ok: false, reason: '自选最多 30 只,请先移除一些' });
+  }
+  list.push(symbol);
+  store.saveWatchlist(list);
+  res.json({ ok: true, watchlist: list });
+}));
+
+app.delete('/api/watchlist/:symbol', wrap(async (req, res) => {
+  const symbol = String(req.params.symbol || '').toLowerCase();
+  const list = store.getWatchlist().filter((s) => s !== symbol);
+  store.saveWatchlist(list);
+  res.json({ ok: true, watchlist: list });
+}));
+
 // ---- 账户与交易 ----
 app.get('/api/account', wrap(async (req, res) => {
   const overview = await service.getAccountOverview();
