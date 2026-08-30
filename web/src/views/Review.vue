@@ -174,7 +174,7 @@ function startTour() {
   font-size: 12px; color: var(--muted); font-weight: 500; letter-spacing: 0.05em;
   padding: 10px 18px; border-bottom: 1px solid var(--border); text-align: right;
 }
-.table th.tl { text-align: left; }
+.table th.tl, .table td.tl { text-align: left; }
 .table td { padding: 12px 18px; border-bottom: 1px solid var(--border); text-align: right; }
 .table tbody tr:hover { background: #f4f4f5; }
 .sub-code { font-size: 11px; color: var(--muted); }
