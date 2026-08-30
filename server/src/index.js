@@ -2,6 +2,10 @@ import express from 'express';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { store } from './store.js';
+import { market } from './market.js';
+import * as service from './service.js';
+import { summarize, closedTradeRows } from './review.js';
+import { getTerms, listLessons, getLesson } from './content.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 8090;
@@ -15,10 +19,99 @@ for (const n of storeNotices) {
 const app = express();
 app.use(express.json());
 
-// ---- API 路由(T5 任务逐步挂载) ----
-app.get('/api/meta/status', (req, res) => {
-  res.json({ ok: true, mode: 'live', time: new Date().toISOString() });
-});
+// async 路由统一兜底:5xx 仅服务端故障,业务拒绝一律 200 + { ok:false, reason }
+const wrap = (fn) => (req, res) => {
+  fn(req, res).catch((err) => {
+    console.error(`[api] ${req.method} ${req.path} failed: ${err.message}`);
+    res.status(500).json({ ok: false, error: 'internal error' });
+  });
+};
+
+// ---- 行情 ----
+app.get('/api/meta/status', wrap(async (req, res) => {
+  res.json({ ok: true, ...await service.getStatus() });
+}));
+
+app.get('/api/market/indices', wrap(async (req, res) => {
+  res.json({ ok: true, indices: await market.getIndices() });
+}));
+
+app.get('/api/market/quotes', wrap(async (req, res) => {
+  const symbols = String(req.query.symbols || '')
+    .split(',')
+    .map((s) => s.trim().toLowerCase())
+    .filter((s) => /^[a-z]{2}\d{6}$/.test(s))
+    .slice(0, 100);
+  const quotes = symbols.length ? await market.getQuotes(symbols) : {};
+  res.json({ ok: true, quotes });
+}));
+
+// klt: day | week | minute(minute 返回分时 timeline)
+app.get('/api/market/kline', wrap(async (req, res) => {
+  const symbol = String(req.query.symbol || '').toLowerCase();
+  const klt = ['day', 'week', 'minute'].includes(req.query.klt) ? req.query.klt : 'day';
+  const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 120, 1), 800);
+  if (!/^[a-z]{2}\d{6}$/.test(symbol)) {
+    return res.json({ ok: false, reason: '股票代码格式不正确' });
+  }
+  if (klt === 'minute') {
+    return res.json({ ok: true, timeline: await market.getMinuteTimeline(symbol) });
+  }
+  res.json({ ok: true, bars: await market.getKline(symbol, klt, limit) });
+}));
+
+app.get('/api/market/search', wrap(async (req, res) => {
+  const q = String(req.query.q || '').trim();
+  if (!q) return res.json({ ok: true, list: [] });
+  res.json({ ok: true, list: await market.search(q) });
+}));
+
+// ---- 账户与交易 ----
+app.get('/api/account', wrap(async (req, res) => {
+  const overview = await service.getAccountOverview();
+  await service.refreshSnapshot(); // 每日首次加载更新资产曲线;失败静默
+  res.json(overview);
+}));
+
+app.post('/api/orders', wrap(async (req, res) => {
+  res.json(await service.placeOrder(req.body));
+}));
+
+app.get('/api/trades', wrap(async (req, res) => {
+  const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 0, 0), 1000);
+  res.json({ ok: true, trades: store.getTrades(limit) });
+}));
+
+app.get('/api/review/summary', wrap(async (req, res) => {
+  const trades = store.getTrades();
+  res.json({
+    ok: true,
+    summary: summarize(trades),
+    closedTrades: closedTradeRows(trades),
+    snapshots: store.getSnapshots(),
+  });
+}));
+
+app.post('/api/account/reset', wrap(async (req, res) => {
+  store.reset();
+  console.log('[store] account reset to initial cash');
+  res.json({ ok: true });
+}));
+
+// ---- 学习内容 ----
+app.get('/api/content/terms', wrap(async (req, res) => {
+  res.json({ ok: true, terms: getTerms() });
+}));
+
+app.get('/api/content/lessons', wrap(async (req, res) => {
+  res.json({ ok: true, lessons: listLessons() });
+}));
+
+app.get('/api/content/lessons/:id', wrap(async (req, res) => {
+  const lesson = getLesson(req.params.id);
+  if (!lesson) return res.status(404).json({ ok: false, error: 'lesson not found' });
+  res.json({ ok: true, ...lesson });
+}));
 
 // ---- 前端静态资源 ----
 const dist = path.join(__dirname, '../../web/dist');

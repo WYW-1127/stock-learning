@@ -5,6 +5,7 @@ import { calcFees, roundToCent } from './fees.js';
 const REJECT = (reason) => ({ ok: false, reason });
 
 // FIFO 从批次中扣减 qty,返回 { newLots, consumedCost }
+// 剩余批次的 cost 同步按比例缩减,保持"该批剩余股数的含费总成本"语义
 function consumeLots(lots, qty) {
   const newLots = [];
   let remaining = qty;
@@ -19,7 +20,11 @@ function consumeLots(lots, qty) {
     consumedCost += (lot.cost / lot.qty) * take;
     remaining -= take;
     if (lot.qty - take > 0) {
-      newLots.push({ ...lot, qty: lot.qty - take });
+      newLots.push({
+        ...lot,
+        qty: lot.qty - take,
+        cost: roundToCent(lot.cost - (lot.cost / lot.qty) * take),
+      });
     }
   }
   return { newLots, consumedCost: roundToCent(consumedCost) };

@@ -76,8 +76,8 @@ describe('卖出撮合(FIFO)', () => {
     expect(r.trade.fees).toEqual({ commission: 5, stampTax: 0.63, transferFee: 0.01 });
     // 净得 = 1260 − 5.64 = 1254.36;消耗成本 = 1005 + (530/50)*20 = 1217
     expect(r.trade.realizedPnl).toBe(37.36);
-    // 剩余批次:最早批次清空,第二批次剩 30 股
-    expect(r.positions.sh600519.lots).toEqual([{ qty: 30, date: '2026-08-27', cost: 530 }]);
+    // 剩余批次:最早批次清空,第二批次剩 30 股,成本按比例缩减为 530 × 30/50 = 318
+    expect(r.positions.sh600519.lots).toEqual([{ qty: 30, date: '2026-08-27', cost: 318 }]);
     expect(r.account.cash).toBe(100000 + 1254.36);
   });
 
