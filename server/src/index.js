@@ -1,9 +1,16 @@
 import express from 'express';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { store } from './store.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 8090;
+
+// 存储初始化:目录/默认文件就绪;损坏时自动从 .bak 恢复或回退默认(提示用 ASCII,控制台可能是 GBK)
+const storeNotices = store.init();
+for (const n of storeNotices) {
+  console.log(`[store] ${n.file} ${n.action}`);
+}
 
 const app = express();
 app.use(express.json());
