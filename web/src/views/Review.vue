@@ -1,6 +1,7 @@
 <script setup>
 // 复盘与学习页 — 左:胜率统计+平仓明细;右:课程+术语词典+引导重看
 import { ref, computed, onMounted } from 'vue';
+import { marked } from 'marked';
 import { useContentStore } from '../stores/content.js';
 import { api } from '../api.js';
 import { fmtMoneyK, fmtNum, fmtPct, fmtTime, clsOf } from '../format.js';
@@ -11,6 +12,11 @@ const closedTrades = ref([]);
 const lesson = ref(null); // { id, title, markdown }
 const termQuery = ref('');
 const learned = ref(JSON.parse(localStorage.getItem('learned-lessons') || '[]'));
+
+// 课程正文渲染:内容来自本仓库 content/lesssons(可信源),无需再做 HTML 消毒
+const lessonHtml = computed(() =>
+  lesson.value ? marked.parse(lesson.value.markdown, { breaks: true }) : ''
+);
 
 onMounted(async () => {
   content.ensureLessons();
@@ -111,8 +117,8 @@ function startTour() {
         <div class="block-head"><h3>新手课程</h3><span class="muted">已学 {{ learned.length }} / {{ content.lessons.length }}</span></div>
         <div v-if="lesson" class="lesson-view">
           <button class="btn btn-ghost btn-back" @click="backToList">← 返回列表</button>
-          <h2>{{ lesson.title }}</h2>
-          <div class="lesson-md">{{ lesson.markdown }}</div>
+          <!-- eslint-disable-next-line vue/no-v-html -->
+          <div class="lesson-md" v-html="lessonHtml"></div>
         </div>
         <ul v-else class="lesson-list">
           <li v-for="l in content.lessons" :key="l.id" :class="{ done: learned.includes(l.id) }" @click="openLesson(l.id)">
@@ -184,8 +190,39 @@ function startTour() {
 .lesson-list li.done .lesson-state { color: var(--down); }
 .lesson-view { padding: 16px 20px; }
 .btn-back { min-height: 32px; font-size: 13px; margin-bottom: 12px; }
-.lesson-view h2 { font-size: 17px; margin-bottom: 12px; }
-.lesson-md { white-space: pre-wrap; font-size: 14px; line-height: 1.8; color: var(--ink); }
+/* 课程正文排版:marked 渲染后的富文本 */
+.lesson-md { font-size: 14px; line-height: 1.9; color: var(--ink); }
+.lesson-md :deep(h1) {
+  font-size: 19px; font-weight: 700; margin: 8px 0 16px; padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.lesson-md :deep(h2) {
+  font-size: 16px; font-weight: 700; margin: 26px 0 10px;
+  padding-left: 10px; border-left: 3px solid var(--accent);
+}
+.lesson-md :deep(h3) { font-size: 14.5px; font-weight: 700; margin: 18px 0 8px; }
+.lesson-md :deep(p) { margin: 10px 0; }
+.lesson-md :deep(ul), .lesson-md :deep(ol) { padding-left: 22px; margin: 10px 0; }
+.lesson-md :deep(li) { margin: 5px 0; }
+.lesson-md :deep(b), .lesson-md :deep(strong) { font-weight: 700; }
+.lesson-md :deep(table) { border-collapse: collapse; margin: 14px 0; width: 100%; font-size: 13px; }
+.lesson-md :deep(th) {
+  background: #f4f4f5; color: var(--muted); font-weight: 600; letter-spacing: 0.03em;
+  padding: 8px 12px; border: 1px solid var(--border); text-align: left;
+}
+.lesson-md :deep(td) { padding: 8px 12px; border: 1px solid var(--border); }
+.lesson-md :deep(blockquote) {
+  margin: 14px 0; padding: 10px 14px; background: var(--amber-tint);
+  border-left: 3px solid var(--notice); border-radius: 0 8px 8px 0;
+  color: var(--ink);
+}
+.lesson-md :deep(blockquote p) { margin: 4px 0; }
+.lesson-md :deep(code) {
+  font-family: var(--font-mono); font-size: 12.5px; background: #f4f4f5;
+  border-radius: 4px; padding: 1px 5px;
+}
+.lesson-md :deep(hr) { border: none; border-top: 1px dashed var(--border); margin: 20px 0; }
+.lesson-md :deep(em) { color: var(--muted); }
 .term-search { padding: 12px 18px 0; }
 .term-search input {
   width: 100%; height: 40px; border: 1px solid var(--border); border-radius: 8px; padding: 0 12px; font-size: 13px;
