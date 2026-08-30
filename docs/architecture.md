@@ -21,6 +21,7 @@
 | 2026-08-30 | 随时可交易(盘后按收盘价)+ 界面标注 | 用户晚上/周末使用,严格开盘时段会不可用 |
 | 2026-08-30 | 前端用 Stitch 生成设计稿,MCP 拉取后照稿开发 | 用户指定;视觉质量有基准 |
 | 2026-08-30 | v1 撮合只做即时成交,不做挂单 | 范围控制;界面如实标注限制 |
+| 2026-08-30 | **K线/分时/搜索全部切腾讯**(ifzq K线 + minute 分时 + smartbox 搜索);东财仅文档备选 | 实测:东财 push2his 在本机直连不可达(代理开关均如此);东财 suggest 对 Node fetch 的 TLS 指纹返回无股票数据的 JSONP 分支(curl 却正常)。腾讯系接口对 Node fetch 全部稳定 |
 
 ## 2. 目录结构
 
@@ -111,11 +112,14 @@
 
 | 用途 | 来源 | 备注 |
 |---|---|---|
-| 实时报价+五档+涨跌停价 | 腾讯 qt.gtimg.cn/q=sh600519 | GBK 编码需 iconv-lite;单次批量 ~60 只上限 |
-| 日/周/分时K线 | 东方财富 push2his kline 接口 | secid: 沪=1.xxx 深=0.xxx;klt 101/102/1;fqt=1 前复权 |
-| 搜索 | 东方财富 searchapi suggest | 过滤仅保留沪深 A 股票 |
+| 实时报价+五档+涨跌停价 | 腾讯 qt.gtimg.cn/q=sh600519 | GBK 编码需 iconv-lite;单次批量 ~60 只上限;`q=` 在路径上(无 `?`) |
+| 日/周K线(前复权) | 腾讯 web.ifzq.gtimg.cn fqkline | `param=代码,day|week,,,数量,qfq`;UTF-8 JSON;指数无 qfqday 键,回退 day/week 键 |
+| 分时 | 腾讯 ifzq minute/query | 每行"时间 现价 累计量(手) 累计额(元)";分钟量取差分,均价=累计额/累计量/100 |
+| 搜索 | 腾讯 smartbox.gtimg.cn | GBK;`v_hint="市场~代码~名称(\uXXXX转义)~拼音~类型^..."`;只留 sh/sz 且类型 GP-A |
 
-缓存:报价 3 秒 TTL;日K 当日缓存;日历按年缓存至内存。所有上游请求 5 秒超时,失败重试 2 次(退避 500ms/1s)。
+> ⚠️ 已弃用东财 push2his(K线)与 searchapi(搜索),原因见 §1 决策记录 2026-08-30 条目。
+
+缓存:报价 3 秒 TTL(按只);日K 当日缓存;周K 60 秒;分时 5 秒;日历按年缓存至内存。所有上游请求 5 秒超时,失败重试 2 次(退避 500ms/1s)。
 
 > ⚠️ 腾讯/东财接口在境内直连正常,**不要**给它们走代理;仅 Stitch/Google 相关请求需要代理(见 §8)。
 
@@ -136,6 +140,7 @@
 - Stitch CLI 一键包装:`bash C:/Users/wangy/.zcode/stitch-proxy/stitch.sh <命令>`(自动带 key 与代理,**key 不入仓库、不显示在输出**)
 - Stitch 项目 ID:`13228539535838239483`;屏幕 ID 对照:`design/stitch/index.json`
 - GitHub:仓库 `WYW-1127/stock-learning`(私有),git 凭据用本机 store 模式,推送直接可用
+- **东财接口坑(2026-08-30 实测)**:①push2his 域名族本机直连不可达,代理开关均如此,且非整体断网(同机房 push2/searchapi/datacenter 正常);②searchapi 对 Node fetch 无论何种 header 都返回"JSONP 包装 + 无股票数据的分支",curl 却返回纯 JSON 股票数据——判定为按 TLS/HTTP2 指纹分流,程序化客户端被歧视。**教训:验证上游接口必须用 Node fetch 实测,只跑 curl 会误判可用**
 
 ## 9. 测试策略
 
