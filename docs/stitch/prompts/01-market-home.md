@@ -2,7 +2,7 @@
 
 Use the attached design system (DESIGN.md) — light theme, 红涨绿跌, mono numerals.
 
-Top nav (56px): left wordmark "模拟盘 · 股票学习" with a small cinnabar candlestick logo mark; center nav items: 行情 (active, cinnabar), 持仓, 复盘, 学习; right: a quiet "新手引导" ghost button and virtual cash chip "可用资金 ¥82,410.55" (mono).
+Top nav (56px): left wordmark "模拟盘 · 股票学习" with a small cinnabar candlestick logo mark; center nav items: 行情 (active, cinnabar), 持仓, 复盘与学习 (three tabs only — stock detail is a drill-in page, order panel is a modal, neither is a tab); right: a quiet "新手引导" ghost button and virtual cash chip "可用资金 ¥82,410.55" (mono).
 
 Below nav, a horizontal strip of 3 index cards, asymmetric widths (2fr 1fr 1fr): 上证指数 3,042.35 +25.10 (+0.83%) red, 深证成指 9,182.76 −41.32 (−0.45%) jade, 创业板指 1,758.59 +8.42 (+0.48%) red. Each card: index name (14px), large mono value, change line in Data Up Red / Data Down Jade.
 

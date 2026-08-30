@@ -1,6 +1,6 @@
 # Screen 5: 复盘与学习 (Review & Learn)
 
-Use the attached design system (DESIGN.md). Top nav with 复盘 active. Two-column asymmetric split: LEFT 58% 复盘, RIGHT 42% 学习, divided by a whisper border.
+Use the attached design system (DESIGN.md). Top nav with 复盘与学习 active (nav has exactly three tabs: 行情 / 持仓 / 复盘与学习). Two-column asymmetric split: LEFT 58% 复盘, RIGHT 42% 学习, divided by a whisper border.
 
 LEFT — 交易复盘:
 1. Stats row (3 compact stat tiles, NOT identical-width): 胜率 62.5% (with sub "5/8 笔盈利", mono) · 已实现盈亏 +¥486.20 (red mono) · 平均持有 4.2 天.
