@@ -7,7 +7,9 @@ import path from 'node:path';
 
 const CONFIG_PATH = path.join(os.homedir(), '.stock-learning', 'ai.json');
 const DEFAULT_BASE_URL = 'https://open.bigmodel.cn/api/paas/v4';
-const DEFAULT_MODEL = 'glm-4-flash';
+// GLM-5 系最新(2026-09):glm-5.3-flash 能力对标 Claude Opus 4.8、价格为旗舰 glm-5.3 的 1/10、支持 FC;
+// 思考内容在独立字段,不影响 content 的 JSON 解析。备选:免费 glm-4.7-flash / 最强 glm-5.3(改配置即可)
+const DEFAULT_MODEL = 'glm-5.3-flash';
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 

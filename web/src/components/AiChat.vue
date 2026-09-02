@@ -116,7 +116,7 @@ onBeforeUnmount(() => window.removeEventListener('ai-ask', onAsk));
           <li>在本机创建文件 <code>{{ status.configPath }}</code>,内容:
             <pre>{
   "apiKey": "你的Key",
-  "model": "glm-4-flash"
+  "model": "glm-5.3-flash"
 }</pre>
             保存后重启服务即可。
           </li>

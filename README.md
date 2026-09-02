@@ -31,9 +31,9 @@
 1. 到 [bigmodel.cn](https://bigmodel.cn) 注册并创建 API Key(有免费额度)
 2. 创建文件 `C:\Users\<你>\.stock-learning\ai.json`(路径以页面提示为准):
    ```json
-   { "apiKey": "你的Key", "model": "glm-4-flash" }
+   { "apiKey": "你的Key", "model": "glm-5.3-flash" }
    ```
-   保存后重启服务。
+   保存后重启服务。默认 `glm-5.3-flash`(GLM-5 系,能力强、价格约为旗舰 1/10);想换只改 model 字段:免费用 `glm-4.7-flash`,最强用 `glm-5.3`。
 
 Key 只存在本机,不进项目仓库。AI 只做分析参考、不能替你下单;输出仅供学习,不构成投资建议。
 

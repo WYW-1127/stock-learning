@@ -25,7 +25,7 @@
 ## 下一步(按序)
 
 1. **用户提供智谱 API Key**(`~/.stock-learning/ai.json`,格式见 README「AI 教练」节)→ 跑 spec §2 的真机验收 S1–S7(七个自然语言场景,验证意图识别/实体解析/工具调用/数字防编造/批量快照),重点看日志工具调用序列
-2. 若 glm-4-flash 工具调用不稳 → 配置切 glm-4-air/plus 只改配置
+2. 若 glm-5.3-flash 工具调用不稳 → 配置切 glm-5.3(更强)/ glm-4.7-flash(免费),只改配置
 3. 周一盘中自然观察项(live 角标/T+1 解锁/断网横幅)继续有效
 
 > AI 功能相关文件:server/src/ai/{indicators,llm,tools,prompts,schemas,context,agent}.js + web/src/components/AiChat.vue + 3 条 /api/ai/* 路由;spec:docs/superpowers/specs/2026-09-02-ai-investment-agent-design.md

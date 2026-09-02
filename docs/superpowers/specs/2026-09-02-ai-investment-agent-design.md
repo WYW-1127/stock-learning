@@ -101,10 +101,10 @@ server/src/ai/agent.js ── 意图+实体识别 → Tool Calling 主循环(≤
 
 - 配置文件(仓库外,红线):`~/.stock-learning/ai.json`
   ```json
-  { "apiKey": "智谱APIKey", "baseUrl": "https://open.bigmodel.cn/api/paas/v4", "model": "glm-4-flash" }
+  { "apiKey": "智谱APIKey", "baseUrl": "https://open.bigmodel.cn/api/paas/v4", "model": "glm-5.3-flash" }
   ```
   环境变量 `ZHIPU_API_KEY` / `AI_MODEL` 可覆盖;未配置时 `/api/ai/status` 返回 `{configured:false}`,前端显示配置指引。
-- 默认 `glm-4-flash`(免费);真机验收不过则配置切 `glm-4-air`/`glm-4-plus`,**只改配置不改代码**。
+- 默认 `glm-5.3-flash`(GLM-5 系最新,FC 支持好,价格为旗舰 1/10;GLM-4.5-Flash 已于 2026-01-30 下线);真机验收不过则配置切 `glm-5.3`(更强)或 `glm-4.7-flash`(免费),**只改配置不改代码**。
 - 请求:OpenAI 兼容 `POST {baseUrl}/chat/completions`,`messages` + `tools`;超时 60s;网络失败重试 1 次(退避 2s)。
 - 不依赖 `response_format`(与 tools 同用兼容性存疑),JSON 约定走 prompt + 解析兜底(§8)。
 
