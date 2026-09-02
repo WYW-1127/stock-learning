@@ -38,5 +38,31 @@ export const api = {
   aiStatus: () => request('/api/ai/status'),
   aiChat: (message) =>
     request('/api/ai/chat', { method: 'POST', body: JSON.stringify({ message }) }),
+  // 流式版:SSE 逐事件回调(思考增量/工具进度/最终答案),网络异常抛错
+  aiChatStream: async (message, onEvent) => {
+    const res = await fetch('/api/ai/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message, stream: true }),
+    });
+    if (!res.ok || !res.body) throw new Error(`请求失败(${res.status})`);
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buf = '';
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += decoder.decode(value, { stream: true });
+      let idx;
+      while ((idx = buf.indexOf('\n')) >= 0) {
+        const line = buf.slice(0, idx).trim();
+        buf = buf.slice(idx + 1);
+        if (!line.startsWith('data:')) continue;
+        try {
+          onEvent(JSON.parse(line.slice(5).trim()));
+        } catch {} // 单个坏事件不中断整条流
+      }
+    }
+  },
   aiClear: () => request('/api/ai/chat', { method: 'DELETE' }),
 };

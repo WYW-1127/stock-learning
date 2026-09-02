@@ -14,7 +14,8 @@ const CASES = [
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 let fail = 0;
 
-for (const [id, msg] of CASES) {
+const ONLY = process.argv[2]; // 可传场景号只跑单条,如: node ai-verify.mjs S5
+for (const [id, msg] of CASES.filter(([i]) => !ONLY || i === ONLY)) {
   const t0 = Date.now();
   let out;
   try {

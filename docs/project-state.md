@@ -1,10 +1,10 @@
 # 项目状态(project-state)
 
-> **每次开发会话:开场先读我,收工必更新我。** 最后更新:2026-08-30
+> **每次开发会话:开场先读我,收工必更新我。** 最后更新:2026-09-02
 
 ## 一句话现状
 
-**AI Investment Agent 全部完成并真机验收通过**(glm-5.3-flash,七场景 S1–S7 全过:意图识别/实体解析/工具调用/数字防编造/盘后语义/不代客交易)。项目 v1 + AI 功能交付。
+**AI Investment Agent 全部完成并真机验收通过**(glm-5.3-flash,七场景 S1–S7 全过:意图识别/实体解析/工具调用/数字防编造/盘后语义/不代客交易)。项目 v1 + AI 功能交付。**AI 已改 SSE 流式输出:思考过程实时显示在前端折叠面板,质量优先(默认思考开满),单次分析约 40-90s。**
 
 ## 已完成
 
@@ -21,10 +21,12 @@
 - [x] **T5 API 层组装**:content.js(术语/课程读取,含课程列表与 id 白名单防穿越)、review.js(平仓批次 FIFO/加权持有天数/统计,纯函数+10 单测)、service.js(盘后判定+交易日解析、下单内存串行队列、账户视图含可用量/成本价/浮盈、当日资产快照)、index.js 挂全部 §4 路由+SPA 回退;**验收 14/14 全过**(临时 DATA_DIR 预置批次,买入→T+1 人话拒绝→卖出 FIFO 盈亏→账户→流水→复盘→重置→内容;脚本留 server/scripts/t5-verify.mjs 可复跑)。**引擎修正**:consumeLots 部分平仓后剩余批次 cost 按比例缩减(原整批成本导致浮盈虚高),全量回归通过
 - [x] **T6 前端五屏**:api/format/fees 工具 + 三 Pinia store(行情 5s 轮询 visibilitychange 暂停/账户/内容)+ 组件(TermPopover 术语卡、SearchBox 联想、GuidedTour 6 步导览 localStorage、KLineChart klinecharts、OrderPanel 下单抽屉含费用预览/人话拒绝/成交回执)+ 五屏(行情指数主次卡/自选/搜索;个股 60/40 布局+分时日K周K+五档量条+指标术语卡;持仓摘要+SVG资产曲线+T+1角标+历史+重置二次确认;复盘统计+平仓表+课程阅读进度+术语辞典搜索)+ App 壳(现金接store/盘后角标/引导按钮);服务端补 watchlist CRUD 路由。**浏览器实测**:五页渲染无错、K线蜡烛/MA/成交量正常红涨绿跌、买入平安银行 100 股全链路通(回执/现金/持仓/角标)。**两个坑**:①klinecharts v10 移除 applyNewData/setPriceVolumePrecision,须用 setDataLoader+setSymbol/setPeriod 重写;②T+1 可用量前端曾按自然日算,与后端交易日口径在周末盘后不一致(页面显示可卖、下单被拒),已统一为交易日口径(决策记录已修正)
 - [x] **T7 联调收尾**:服务端 EADDRINUSE 友好提示(端口被占给人话指引,实测生效);README 更新为正式快速开始+常见问题;**手动清单浏览器回归全过**——复盘统计与手算一致(预置买卖用例:胜率100%/+984.29/持有2天)、持仓页数字勾稽(总盈亏=已实现+浮动)、重置双确认(错填拦截/输"重置"通过/自选保留)、新手引导 6 步走通、术语卡弹出(换手率)、盘后角标(T6 已验);76/76 单测全绿。**未真实验证项**:断网横幅(代码路径在:quotesError→degraded banner,上游故障自动触发,待自然发生观察);周一盘中 live 模式与 T+1 解锁
+- [x] **AI 流式改造(2026-09-02 用户反馈"分析慢"后)**:①`/api/ai/chat` 支持 SSE(前端 `stream:true`),GLM 思考过程 + 工具进度实时显示在 AiChat 折叠面板,answer 后自动收起;②GLM-5.3 不支持关思考(官方禁止 disabled),默认思考开满质量优先,`reasoningEffort` 配置可降档(不建议);③防编造闸门:零工具带数据 → 打回重查(1次),仍不查 → 拦截;④工具触顶 12 次改为"基于已查数据强制收尾"(不再让用户拆小);⑤同轮多工具 Promise.all 并行 + prompt 批量调用/禁重复调用;⑥S5 触发过 14 次工具触顶,修复后 S5 单测+真机均过(tools=4)。真机验收:S1-S4/S6/S7 数字与账户完全一致,S5 通过;单次 40-90s(思考开满);117 单测全绿;SSE 解析(tool_calls 分片拼装/type 补齐)有专属单测 ai-sse.test.js。**浏览器实测未做**(IAB webview 未就绪),前端渲染待用户刷新页面自然验证
 
 ## 下一步(按序)
 
-1. (无硬性待办)可选项:内容型 RAG(术语/课程知识库接入 Agent)、周一盘中自然观察项继续有效、未来版本方向见 architecture.md §10
+1. (无硬性待办)刷新浏览器页面即可体验 AI 教练思考过程流式展示(前端已构建进 dist);若 UI 渲染异常反馈即可
+2. 可选项:内容型 RAG(术语/课程知识库接入 Agent)、周一盘中自然观察项继续有效、未来版本方向见 architecture.md §10
 
 > AI 功能文件:server/src/ai/*.{indicators,llm,tools,prompts,schemas,context,agent}.js + web/src/components/AiChat.vue + 3 条 /api/ai/* 路由;spec:docs/superpowers/specs/2026-09-02-ai-investment-agent-design.md;验收脚本:node server/scripts/ai-verify.mjs
 > 用户配置:`~/.stock-learning/ai.json`(已配 glm-5.3-flash,按量付费已充值;Coding Plan 额度官方限制仅编程工具可用,不适用本应用)
@@ -75,3 +77,4 @@
 - 2026-08-30:用户指认表格数字列未对齐 → 根因:三个页面表格样式只给 th 设了右对齐、td 漏设(默认左对齐),表头与数据错开;统一给 td 默认右对齐(.tl/.tc 覆盖),并补全课程代码块 pre 样式(ASCII 示意图等宽对齐+横向滚动);浏览器截图验证两处修复
 - 2026-08-31:用户指认历史成交表仍不对齐 → 像素级测量(evaluate 读 rect/textAlign)定位真因:Portfolio/Review 的左对齐覆盖只写了 th.tl、漏了 td.tl,上次"td 默认右对齐"把时间/股票/备注列数据拉到右侧而表头仍在左;补 td.tl/td.tc 覆盖后复测 8 列对齐全 match。教训:**改默认样式时必须核对所有覆盖规则的完整性;对齐问题用 getComputedStyle 实测,别只靠目测截图**
 - 2026-09-02:AI Agent 真机验收完成(glm-5.3-flash 充值后):**S1–S7 七场景全过**——意图/实体/工具链路正确(S4 比亚迪名称解析→6工具→数据全真)、S2/S7 正确处理盘后卖出语义、S3 单工具节制、S6 批量快照、多轮上下文延续("和之前结论一致")、每条附"下单请自行操作"(不代客交易)、facts 数字与页面一致(防编造)。S7 反问分支未触发系当前仅 1 只持仓(单只无需反问,行为合理)。过程中发现并处理:①Windows curl 发中文 GBK 乱码→验收脚本改 Node fetch;②免费 4.7-flash 高峰 429 限流→llm.js 退避重试(5s/15s),用户改充值 5.3-flash;③Coding Plan 额度官方限定编程工具,不能用于本应用
+- 2026-09-02:用户反馈"AI 分析太慢"→ 先做低思考档提速(reasoning_effort=low+并行工具+批量 prompt),实测提速但**诱发模型零工具编造持仓数字**(1700股等,防编造回归);用户改口"久一点没关系,把思考过程显示出来"→ 定稿:**恢复思考开满 + SSE 流式输出思考过程**(llm.chatCompletionStream/agent.onEvent/路由 SSE/前端折叠面板),保留无损优化(同轮工具并行、批量调用、防编造闸门、触顶强制收尾);修智谱流式 tool_calls 缺 type 导致 1214 的坑;S1-S7 复验数字全真;117 单测全绿。决策详见 architecture.md §1 两条 2026-09-02 新条目。遗留:前端思考流 UI 的浏览器目测验证未做(IAB webview 未就绪)

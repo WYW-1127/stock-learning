@@ -145,7 +145,21 @@ app.post('/api/ai/chat', wrap(async (req, res) => {
   if (!loadAiConfig()) {
     return res.json({ ok: false, reason: 'AI 未配置:请在配置文件中填入智谱 API Key 后重启服务(路径见 /api/ai/status)', notConfigured: true });
   }
-  res.json(await runAgent(message));
+  // 流式(SSE):思考增量/工具进度实时下发,answer/error 收尾;前端读 stream:true
+  if (req.body?.stream) {
+    res.writeHead(200, {
+      'Content-Type': 'text/event-stream; charset=utf-8',
+      'Cache-Control': 'no-cache',
+      Connection: 'keep-alive',
+    });
+    const send = (ev) => res.write(`data: ${JSON.stringify(ev)}\n\n`);
+    const r = await runAgent(message, send);
+    if (r.ok) send({ type: 'answer', reply: r.reply, toolCalls: r.toolCalls });
+    else send({ type: 'error', reason: r.reason });
+    res.end();
+    return;
+  }
+  res.json(await runAgent(message)); // 非流式兼容(验收脚本/调试)
 }));
 
 app.delete('/api/ai/chat', wrap(async (req, res) => {
