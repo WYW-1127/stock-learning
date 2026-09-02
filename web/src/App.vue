@@ -5,6 +5,7 @@ import { useMarketStore } from './stores/market.js';
 import { useAccountStore } from './stores/account.js';
 import { fmtMoney } from './format.js';
 import GuidedTour from './components/GuidedTour.vue';
+import AiChat from './components/AiChat.vue';
 
 const route = useRoute();
 const market = useMarketStore();
@@ -48,6 +49,7 @@ function startTour() {
     </footer>
 
     <GuidedTour />
+    <AiChat />
   </div>
 </template>
 

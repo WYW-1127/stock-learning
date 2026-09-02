@@ -6,6 +6,9 @@ import { market } from './market.js';
 import * as service from './service.js';
 import { summarize, closedTradeRows } from './review.js';
 import { getTerms, listLessons, getLesson } from './content.js';
+import { loadAiConfig, configFilePath } from './ai/llm.js';
+import { runAgent } from './ai/agent.js';
+import { clearHistory } from './ai/context.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 8090;
@@ -128,6 +131,26 @@ app.post('/api/account/reset', wrap(async (req, res) => {
 // ---- 学习内容 ----
 app.get('/api/content/terms', wrap(async (req, res) => {
   res.json({ ok: true, terms: getTerms() });
+}));
+
+// ---- AI 教练(自然语言 Agent) ----
+app.get('/api/ai/status', wrap(async (req, res) => {
+  const cfg = loadAiConfig();
+  res.json({ ok: true, configured: !!cfg, model: cfg ? cfg.model : null, configPath: configFilePath() });
+}));
+
+app.post('/api/ai/chat', wrap(async (req, res) => {
+  const message = typeof req.body?.message === 'string' ? req.body.message.trim() : '';
+  if (!message) return res.json({ ok: false, reason: '请输入你的问题' });
+  if (!loadAiConfig()) {
+    return res.json({ ok: false, reason: 'AI 未配置:请在配置文件中填入智谱 API Key 后重启服务(路径见 /api/ai/status)', notConfigured: true });
+  }
+  res.json(await runAgent(message));
+}));
+
+app.delete('/api/ai/chat', wrap(async (req, res) => {
+  clearHistory();
+  res.json({ ok: true });
 }));
 
 app.get('/api/content/lessons', wrap(async (req, res) => {

@@ -4,7 +4,7 @@
 
 ## 一句话现状
 
-**T1-T7 全部完成,v1 交付**:五屏可用、76/76 单测绿、浏览器手动清单回归通过。剩余:周一盘中验证 live 模式与 T+1 解锁(自然观察项)。
+**AI Investment Agent 已实现**(后端 agent 全链路 + 前端 AI 教练抽屉,110/110 单测绿,未配置路径实测通过);**待用户提供智谱 API Key 后跑真机 S1–S7 验收**。
 
 ## 已完成
 
@@ -24,8 +24,11 @@
 
 ## 下一步(按序)
 
-1. **周一盘中观察(自然验证项,非开发任务)**:live 模式角标变红"盘中"、实时价跳动、T+1 解锁(当前 data/ 有 T6 测试买入的平安银行 100 股,8-31 周一应变为可卖)、断网横幅(若上游偶发故障)
-2. 后续版本方向见 architecture.md §10(挂单/基金/回放练习等),启动前先与用户确认
+1. **用户提供智谱 API Key**(`~/.stock-learning/ai.json`,格式见 README「AI 教练」节)→ 跑 spec §2 的真机验收 S1–S7(七个自然语言场景,验证意图识别/实体解析/工具调用/数字防编造/批量快照),重点看日志工具调用序列
+2. 若 glm-4-flash 工具调用不稳 → 配置切 glm-4-air/plus 只改配置
+3. 周一盘中自然观察项(live 角标/T+1 解锁/断网横幅)继续有效
+
+> AI 功能相关文件:server/src/ai/{indicators,llm,tools,prompts,schemas,context,agent}.js + web/src/components/AiChat.vue + 3 条 /api/ai/* 路由;spec:docs/superpowers/specs/2026-09-02-ai-investment-agent-design.md
 
 > T5 验收脚本:`node server/scripts/t5-verify.mjs`(需先以 `DATA_DIR` 指向预置目录起 8092 实例,脚本内有说明注释)。
 > 当前 8090 实例运行中(默认 data/,含一笔测试买入);用户日常通过 启动.bat 启动。
@@ -72,3 +75,4 @@
 - 2026-08-30:用户反馈课程太浅且未渲染 markdown → 课程页接入 marked(排版:小节红边标题/表格/琥珀提示块)+ 六篇课程全部重写(5.7KB→25.9KB,每篇 2000 字级:概念→演算→误区→本工具实操);浏览器验证渲染与测试全绿
 - 2026-08-30:用户指认表格数字列未对齐 → 根因:三个页面表格样式只给 th 设了右对齐、td 漏设(默认左对齐),表头与数据错开;统一给 td 默认右对齐(.tl/.tc 覆盖),并补全课程代码块 pre 样式(ASCII 示意图等宽对齐+横向滚动);浏览器截图验证两处修复
 - 2026-08-31:用户指认历史成交表仍不对齐 → 像素级测量(evaluate 读 rect/textAlign)定位真因:Portfolio/Review 的左对齐覆盖只写了 th.tl、漏了 td.tl,上次"td 默认右对齐"把时间/股票/备注列数据拉到右侧而表头仍在左;补 td.tl/td.tc 覆盖后复测 8 列对齐全 match。教训:**改默认样式时必须核对所有覆盖规则的完整性;对齐问题用 getComputedStyle 实测,别只靠目测截图**
+- 2026-09-02:AI Investment Agent 落地:brainstorming 全流程(模型=智谱/教练式/全局对话),spec v2 吸收外部评审(实体解析铁律/批量风险快照/大盘上下文/上限12/去score化);实现 indicators(MA/MACD/RSI纯函数)+llm(智谱OpenAI兼容+仓库外配置)+tools(9只读工具物理隔离)+prompts/schemas+context(chat.json原子写)+agent(循环/修复重试/降级)+3路由+AiChat.vue(浮窗抽屉/结构化卡片/配置指引/去模拟下单)+个股页问AI入口;110/110 单测绿;未配置路径 curl+浏览器实测通过;**待配 key 真机验收 S1–S7**

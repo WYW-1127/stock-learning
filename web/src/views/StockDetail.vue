@@ -32,11 +32,22 @@ onMounted(async () => {
   market.init();
   market.track(symbol.value);
   account.refresh();
+  // AI 卡片「去模拟下单」跳转:query.side=buy|sell 直接开对应面板
+  if (route.query.side === 'buy' || route.query.side === 'sell') {
+    panelOpen.value = route.query.side;
+  }
 });
 onBeforeUnmount(() => market.untrack(symbol.value));
 
 function onTradeDone() {
   account.refresh(); // 成交后刷新现金/持仓
+}
+
+// 问 AI:预填分析请求,全局抽屉自动发送
+function askAi() {
+  window.dispatchEvent(new CustomEvent('ai-ask', {
+    detail: { message: `帮我分析一下 ${quote.value?.name || symbol.value}(${symbol.value}),现在适合买入还是观望?` },
+  }));
 }
 
 // 五档量条宽度:十档最大量为 100%
@@ -68,6 +79,7 @@ const bookW = (side, i) => {
           @click="market.toggleWatch(symbol)"
         >★ 已自选</button>
         <button v-else class="btn btn-ghost btn-star" @click="market.toggleWatch(symbol)">☆ 加自选</button>
+        <button class="btn btn-ghost btn-star" @click="askAi">🤖 问 AI</button>
       </div>
       <div class="order-entry">
         <button class="btn btn-buy btn-lg" @click="panelOpen = 'buy'">买入</button>

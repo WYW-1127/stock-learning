@@ -34,4 +34,9 @@ export const api = {
   getTerms: () => request('/api/content/terms'),
   getLessons: () => request('/api/content/lessons'),
   getLesson: (id) => request(`/api/content/lessons/${id}`),
+  // AI 教练
+  aiStatus: () => request('/api/ai/status'),
+  aiChat: (message) =>
+    request('/api/ai/chat', { method: 'POST', body: JSON.stringify({ message }) }),
+  aiClear: () => request('/api/ai/chat', { method: 'DELETE' }),
 };

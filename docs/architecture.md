@@ -24,6 +24,7 @@
 | 2026-08-30 | **K线/分时/搜索全部切腾讯**(ifzq K线 + minute 分时 + smartbox 搜索);东财仅文档备选 | 实测:东财 push2his 在本机直连不可达(代理开关均如此);东财 suggest 对 Node fetch 的 TLS 指纹返回无股票数据的 JSONP 分支(curl 却正常)。腾讯系接口对 Node fetch 全部稳定 |
 | 2026-08-30 | 引擎修正:FIFO 部分平仓后剩余批次 cost 按比例缩减(保持"该批剩余股数含费总成本"语义) | 原实现保持整批 cost,导致账户浮盈虚高;consumedCost 本按单价摊算不受影响,T5 验收发现并修正 |
 | 2026-08-30 | ~~T+1 可用量在账户视图按自然日判定~~ **修正:账户视图与下单同用当前交易日判定**(T6 浏览器实测发现) | 周末盘后买入会回溯到上一交易日批次,自然日口径会出现"页面显示可卖、下单被 T+1 拒绝"的不一致 |
+| 2026-09-02 | **接入自然语言 AI Investment Agent**(智谱 GLM,OpenAI 兼容):9 只读工具+agent 循环+结构化 JSON 输出;只分析不交易(工具表物理隔离无下单能力);key 存仓库外 `~/.stock-learning/ai.json`;spec 见 docs/superpowers/specs/2026-09-02-ai-investment-agent-design.md | 用户需求:自然语言问"能不能买/卖",Agent 自主查行情/持仓/指标再判断;技术指标程序计算防 LLM 心算;去 score 化(stanceText+三档置信度)防伪科学感 |
 
 ## 2. 目录结构
 
