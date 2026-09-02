@@ -100,7 +100,8 @@ export async function runAgent(message) {
       toolCalls: toolCallCount,
     };
   } catch (err) {
-    // 网络/API 失败:不落盘历史(用户重问),友好降级
+    // 网络/API 失败:不落盘历史(用户重问),友好降级;ASCII 日志便于排障
+    console.error(`[ai] agent failed: ${err.message}`);
     return {
       ok: true,
       reply: fallbackReply(null, 'AI 服务暂时不可用(网络或接口异常),请稍后再试;行情与交易功能不受影响。'),
