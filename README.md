@@ -24,6 +24,17 @@
 - 行情区显示橙色横幅"行情获取失败":免费行情接口偶发波动,页面会自动重试并保留旧数据
 - 盘后/周末使用:界面有"盘后模式"角标,买卖按最近收盘价撮合;周末买入的股票要到下一交易日才能卖(T+1)
 
+## 服务器部署(Docker)
+
+打包成 Docker 镜像部署到云服务器,公网访问 + 口令保护(Basic Auth)+ 数据卷持久化:
+
+```bash
+cp .env.example .env   # 填网页口令与 AI 密钥
+docker compose up -d --build
+```
+
+完整步骤、镜像离线搬运、HTTPS 建议与故障排查见 **[docs/deploy.md](docs/deploy.md)**。
+
 ## AI 教练(可选)
 
 内置自然语言 AI 投资助手:右下角「AI 教练」直接用大白话提问("我买的平安银行现在能卖吗?"),它会自主查询你的持仓、实时行情和技术指标再给出分析参考。两步启用:
@@ -52,7 +63,7 @@ Key 只存在本机,不进项目仓库。AI 只做分析参考、不能替你下
 
 Node.js (Express) · Vue 3 (Vite, Pinia) · klinecharts · 本地 JSON 存储
 数据源:腾讯行情(实时报价/五档、K线、分时、搜索)
-开发命令:`npm test`(76 项单测)/ `npm run dev:server` + `npm run dev:web`(热更新)
+开发命令:`npm test`(123 项单测)/ `npm run dev:server` + `npm run dev:web`(热更新)
 
 ## 目录结构
 

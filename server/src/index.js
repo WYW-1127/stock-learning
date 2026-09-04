@@ -9,6 +9,7 @@ import { getTerms, listLessons, getLesson } from './content.js';
 import { loadAiConfig, configFilePath } from './ai/llm.js';
 import { runAgent } from './ai/agent.js';
 import { clearHistory } from './ai/context.js';
+import { createAuth } from './auth.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 8090;
@@ -21,6 +22,10 @@ for (const n of storeNotices) {
 
 const app = express();
 app.use(express.json());
+
+// 公网口令保护:配置 AUTH_USER/AUTH_PASS 才启用;不配置则与本地使用行为一致
+const auth = createAuth(process.env.AUTH_USER, process.env.AUTH_PASS);
+if (auth) app.use(auth);
 
 // async 路由统一兜底:5xx 仅服务端故障,业务拒绝一律 200 + { ok:false, reason }
 const wrap = (fn) => (req, res) => {

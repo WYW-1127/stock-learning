@@ -1,0 +1,14 @@
+# 构建上下文最小化:运行时只需要 server/、web/(源码)、content/
+node_modules/
+**/node_modules/
+data/
+web/dist/
+.git/
+docs/
+design/
+.env
+.env.*
+# 只排除根级文档;content/lessons/*.md 是运行时课程内容,不能排
+*.md
+启动.bat
+agent需求.md

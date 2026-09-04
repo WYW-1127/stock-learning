@@ -27,6 +27,7 @@
 | 2026-09-02 | **接入自然语言 AI Investment Agent**(智谱 GLM,OpenAI 兼容):9 只读工具+agent 循环+结构化 JSON 输出;只分析不交易(工具表物理隔离无下单能力);key 存仓库外 `~/.stock-learning/ai.json`;spec 见 docs/superpowers/specs/2026-09-02-ai-investment-agent-design.md | 用户需求:自然语言问"能不能买/卖",Agent 自主查行情/持仓/指标再判断;技术指标程序计算防 LLM 心算;去 score 化(stanceText+三档置信度)防伪科学感 |
 | 2026-09-02 | **AI 改为 SSE 流式输出,思考过程实时展示**(`/api/ai/chat` 带 `stream:true` 走 SSE,不带则兼容旧 JSON);GLM 思考增量(delta.reasoning_content)经 onEvent 逐级转发到前端折叠面板;默认思考深度开满(质量优先,用户确认"久一点没关系"),`reasoningEffort` 配置可降档 | 用户反馈分析慢且不可见;实测 glm-5.3-flash 不支持关思考(传 disabled 被忽略/官方文档禁止),只能流式把等待"变成看得见的思考";单次分析 40-90s,全程思考流+工具进度可见不焦虑 |
 | 2026-09-02 | **防编造双保险**:①"零工具带数据"闸门——回复含 facts 或方向性结论但一次工具未调,打回重查(独立 1 次预算),仍不查则拦截降级;②工具触顶 12 次不放弃,强制模型基于已查数据直接收尾输出 JSON | 实测 reasoning_effort=low 时模型会跳过工具凭空编持仓数字(1700股等),违反防编造铁律;触顶原"请拆小"浪费已查数据。注:流式拼装 tool_calls 必须补 `type:'function'`,否则回传报智谱 1214"工具类型不能为空" |
+| 2026-09-04 | **Docker 化部署 + 应用内 Basic Auth**:多阶段镜像(web 构建层→node:22-alpine 运行层,非 root);compose 挂数据卷 ./data:/data,AI key 与口令走 .env 环境变量注入(密钥不入库);镜像钉死 TZ=Asia/Shanghai(盘中/盘后与交易日判定依赖本地时间,容器默认 UTC 会全错);鉴权以 AUTH_USER/AUTH_PASS 是否配置为开关,不配置则不挂载 | 公网仅自己使用场景:Basic Auth 前端零改动(浏览器原生弹框记凭据,fetch/SSE 同源自动携带);鉴权放应用层而非反代层,同一镜像"本地无鉴权/服务器有鉴权"用环境变量切换;`/api/meta/status` 免口令白名单供 healthcheck。自引用依赖 `stock-learning: file:..`(server/web package.json,代码从未引用)已删——否则 Docker 内 npm ci 拖入整个仓库 |
 
 ## 2. 目录结构
 
