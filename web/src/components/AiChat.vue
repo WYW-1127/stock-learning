@@ -299,12 +299,12 @@ onBeforeUnmount(() => window.removeEventListener('ai-ask', onAsk));
 .conf { font-size: 11px; color: var(--muted); }
 .ai-stance { font-weight: 700; margin-bottom: 8px; }
 .ai-facts {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px;
+  display: flex; flex-direction: column; gap: 7px;
   background: #f7f7f8; border-radius: 8px; padding: 8px 10px; margin-bottom: 8px; font-size: 12px;
 }
-.fact { display: flex; justify-content: space-between; gap: 6px; }
-.fact i { font-style: normal; color: var(--muted); }
-.fact b { font-family: var(--font-mono); font-weight: 600; }
+.fact { display: flex; align-items: baseline; gap: 8px; }
+.fact i { font-style: normal; color: var(--muted); flex: 0 0 auto; min-width: 4em; white-space: nowrap; }
+.fact b { font-family: var(--font-mono); font-weight: 600; flex: 1; min-width: 0; line-height: 1.6; word-break: break-word; }
 .ai-list { margin: 6px 0 6px 16px; font-size: 12.5px; color: var(--ink); }
 .ai-list li { margin: 3px 0; }
 .ai-list.risks li { color: var(--notice); }
