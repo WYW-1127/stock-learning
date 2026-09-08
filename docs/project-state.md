@@ -4,7 +4,7 @@
 
 ## 一句话现状
 
-**AI Investment Agent 全部完成并真机验收通过**(glm-5.3-flash,七场景 S1–S7 全过)。项目 v1 + AI 功能交付。**AI 已改 SSE 流式输出**(思考过程实时显示,质量优先,单次分析约 40-90s)。**2026-09-04:已 Docker 化 + Basic Auth 口令保护,具备云服务器公网部署能力**(docs/deploy.md,待用户实际部署)。**2026-09-09:AI 教练纳入基本面**(新工具 get_stock_fundamentals,新浪财务指标源,E2E 验收通过)。
+**AI Investment Agent 全部完成并真机验收通过**(glm-5.3-flash,七场景 S1–S7 全过)。项目 v1 + AI 功能交付。**AI 已改 SSE 流式输出**(思考过程实时显示,质量优先,单次分析约 40-90s)。**2026-09-04:已 Docker 化 + Basic Auth 口令保护,具备云服务器公网部署能力**(docs/deploy.md,待用户实际部署)。**2026-09-09:AI 纳入基本面并更名「AI Investment Agent」**(新工具 get_stock_fundamentals,新浪财务指标源,E2E 验收通过;原名"AI 教练"因用户嫌难听弃用)。
 
 ## 已完成
 
@@ -85,4 +85,5 @@
 - 2026-09-02:用户反馈"AI 分析太慢"→ 先做低思考档提速(reasoning_effort=low+并行工具+批量 prompt),实测提速但**诱发模型零工具编造持仓数字**(1700股等,防编造回归);用户改口"久一点没关系,把思考过程显示出来"→ 定稿:**恢复思考开满 + SSE 流式输出思考过程**(llm.chatCompletionStream/agent.onEvent/路由 SSE/前端折叠面板),保留无损优化(同轮工具并行、批量调用、防编造闸门、触顶强制收尾);修智谱流式 tool_calls 缺 type 导致 1214 的坑;S1-S7 复验数字全真;117 单测全绿。决策详见 architecture.md §1 两条 2026-09-02 新条目。遗留:前端思考流 UI 的浏览器目测验证未做(IAB webview 未就绪)
 - 2026-09-04:用户要求"打包成 Docker 镜像部署到服务器,公网仅自己访问"→ Docker 化 + Basic Auth 全套落地(auth.js 中间件+6单测/多阶段 Dockerfile 含 TZ=Asia/Shanghai 时区坑/docker-compose 数据卷+.env 密钥注入/docs/deploy.md 两条部署路线);清理 server/web 从未引用的 `file:..` 自引用依赖(重生成 lock);123 单测全绿 + 本机构建冒烟全过(鉴权/白名单/时区 CST/无 AUTH 全放行)。冒烟撞坑三枚:Docker Hub 被墙走 daocloud 镜像源、非 root 容器 /data EACCES 镜像内预 chown、package.json 编辑被外部进程还原需即时验证落盘。待用户在服务器实际部署(deploy.md 路线 A/B)
 - 2026-09-07:用户截图反馈 AI 教练 facts 卡片排版乱(标签被挤成逐字竖排)→ 根因:`.ai-facts` 两列 grid 在 440px 抽屉里每列仅 ~170px,`.fact` 横向 flex + space-between 把标签挤压竖排;修复为单列 key-value 行(标签 `flex:0 0 auto`+nowrap+min-width 4em,值 `flex:1` 换行悬挂对齐),前端已重建 dist。IAB webview 仍未就绪,改用"最小验证页 + Edge 无头截图"完成目测验证(标签单行/列对齐/长句换行对齐全部达标),临时文件已清理
-- 2026-09-09:用户要求 AI 综合分析加上基本面 → 落地 `get_stock_fundamentals` 工具(新浪 vFD 财务指标源,3 年页并行 + 24h 缓存,最近两年报+最新季报 9 项指标 + 实时 PE/PB/市值),提示词纳入综合判断;撞坑:新浪销售毛利率停更用成本率反推、market.js round2 无判空守卫;128 单测全绿 + 工具直调与 E2E 验收通过(细节见"已完成"对应条目与 architecture.md §1)。**待用户自然验证**:前端问个股买卖问题,确认 facts 卡片出现基本面数字、结论融合两面信号
+- 2026-09-09:用户要求"AI 综合分析加上基本面" → 落地 `get_stock_fundamentals` 工具(新浪 vFD 财务指标源,3 年页并行 + 24h 缓存,最近两年报+最新季报 9 项指标 + 实时 PE/PB/市值),提示词纳入综合判断;撞坑:新浪销售毛利率停更用成本率反推、market.js round2 无判空守卫;128 单测全绿 + 工具直调与 E2E 验收通过(细节见"已完成"对应条目与 architecture.md §1)。**待用户自然验证**:前端问个股买卖问题,确认 facts 卡片出现基本面数字、结论融合两面信号
+- 2026-09-09:用户嫌"AI 教练"名字难听 → **全站更名「AI Investment Agent」**(与 spec 文档一致):前端浮动按钮/抽屉标题/欢迎语/未配置指引、系统提示词人设(【教练风格】同步改叫【表达风格】,行为不变)、README/deploy.md/api.js/index.js 注释;web dist 已重建。历史日志与 spec 中的旧称保留(如实记录当时状态)

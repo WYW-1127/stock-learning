@@ -138,7 +138,7 @@ app.get('/api/content/terms', wrap(async (req, res) => {
   res.json({ ok: true, terms: getTerms() });
 }));
 
-// ---- AI 教练(自然语言 Agent) ----
+// ---- AI Investment Agent(自然语言 Agent) ----
 app.get('/api/ai/status', wrap(async (req, res) => {
   const cfg = loadAiConfig();
   res.json({ ok: true, configured: !!cfg, model: cfg ? cfg.model : null, configPath: configFilePath() });

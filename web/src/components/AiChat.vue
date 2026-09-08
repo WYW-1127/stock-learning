@@ -1,5 +1,5 @@
 <script setup>
-// AI 教练 — 全局浮动入口 + 聊天抽屉:自然语言提问,Agent 自主查数据后给结构化分析卡
+// AI Investment Agent — 全局浮动入口 + 聊天抽屉:自然语言提问,Agent 自主查数据后给结构化分析卡
 // 监听 window 'ai-ask' 事件(detail.message)供个股页快捷入口预填发送
 import { ref, nextTick, onMounted, onBeforeUnmount } from 'vue';
 import { useRouter } from 'vue-router';
@@ -133,9 +133,9 @@ onBeforeUnmount(() => window.removeEventListener('ai-ask', onAsk));
 
 <template>
   <!-- 浮动按钮 -->
-  <button v-if="!open" class="fab" @click="toggle" title="AI 教练">
+  <button v-if="!open" class="fab" @click="toggle" title="AI Investment Agent">
     <span class="fab-icon">🤖</span>
-    <span class="fab-label">AI 教练</span>
+    <span class="fab-label">AI Investment Agent</span>
   </button>
 
   <!-- 聊天抽屉 -->
@@ -143,7 +143,7 @@ onBeforeUnmount(() => window.removeEventListener('ai-ask', onAsk));
     <aside class="chat-drawer">
       <header class="chat-head">
         <div>
-          <h3>AI 教练</h3>
+          <h3>AI Investment Agent</h3>
           <span class="chat-sub">{{ status.configured ? `模型 ${status.model} · 自主查询你的行情与持仓` : '未配置' }}</span>
         </div>
         <div class="chat-ops">
@@ -154,7 +154,7 @@ onBeforeUnmount(() => window.removeEventListener('ai-ask', onAsk));
 
       <!-- 未配置指引 -->
       <div v-if="!status.configured" class="setup">
-        <p>AI 教练还没配置。两步启用:</p>
+        <p>AI Investment Agent 还没配置。两步启用:</p>
         <ol>
           <li>到 <a href="https://bigmodel.cn" target="_blank" rel="noopener">bigmodel.cn</a> 注册并创建 API Key(有免费额度)</li>
           <li>在本机创建文件 <code>{{ status.configPath }}</code>,内容:
@@ -170,8 +170,8 @@ onBeforeUnmount(() => window.removeEventListener('ai-ask', onAsk));
 
       <div v-else ref="listEl" class="chat-list">
         <div v-if="!messages.length" class="welcome">
-          <div class="welcome-title">👋 我是你的 A 股学习教练</div>
-          <p>直接用大白话问我,我会自己去查你的持仓、实时行情和技术指标再回答:</p>
+          <div class="welcome-title">👋 我是你的 AI Investment Agent</div>
+          <p>直接用大白话问我,我会自己去查你的持仓、实时行情、技术指标和基本面再回答:</p>
           <div class="chips">
             <button class="chip-q" @click="send('分析一下平安银行')">分析一下平安银行</button>
             <button class="chip-q" @click="send('我买的股票现在能卖吗?')">我买的股票现在能卖吗?</button>

@@ -35,9 +35,9 @@ docker compose up -d --build
 
 完整步骤、镜像离线搬运、HTTPS 建议与故障排查见 **[docs/deploy.md](docs/deploy.md)**。
 
-## AI 教练(可选)
+## AI Investment Agent(可选)
 
-内置自然语言 AI 投资助手:右下角「AI 教练」直接用大白话提问("我买的平安银行现在能卖吗?"),它会自主查询你的持仓、实时行情和技术指标再给出分析参考。两步启用:
+内置自然语言 AI 投资助手:右下角「AI Investment Agent」直接用大白话提问("我买的平安银行现在能卖吗?"),它会自主查询你的持仓、实时行情、技术指标和基本面再给出分析参考。两步启用:
 
 1. 到 [bigmodel.cn](https://bigmodel.cn) 注册并创建 API Key(有免费额度)
 2. 创建文件 `C:\Users\<你>\.stock-learning\ai.json`(路径以页面提示为准):

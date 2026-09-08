@@ -32,7 +32,7 @@ cd stock-learning
 
 # 2. 配置口令与 AI 密钥
 cp .env.example .env
-vim .env          # 至少填 AUTH_USER / AUTH_PASS;ZHIPU_API_KEY 想用 AI 教练就填
+vim .env          # 至少填 AUTH_USER / AUTH_PASS;ZHIPU_API_KEY 想用 AI Investment Agent 就填
 
 # 3. 准备数据目录并授权给容器内 node 用户(uid 1000)
 mkdir -p data && sudo chown -R 1000:1000 data
@@ -83,7 +83,7 @@ docker compose up -d        # 镜像已在本地,不会再 build,秒起
 | 变量 | 必填 | 说明 |
 |---|---|---|
 | `AUTH_USER` / `AUTH_PASS` | 公网部署必填 | 网页登录口令(Basic Auth);两个都留空 = 关闭鉴权,仅限本机/内网时这样用 |
-| `ZHIPU_API_KEY` | 可选 | 智谱 AI 教练;留空则 AI 功能提示未配置,其余功能不受影响 |
+| `ZHIPU_API_KEY` | 可选 | 智谱 AI Investment Agent;留空则 AI 功能提示未配置,其余功能不受影响 |
 | `AI_MODEL` | 可选 | 默认 `glm-5.3-flash`;免费 `glm-4.7-flash`,最强 `glm-5.3` |
 
 `.env` 已被 .gitignore 忽略,**严禁提交仓库或发给别人**(密钥红线)。
