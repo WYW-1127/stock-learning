@@ -196,11 +196,11 @@ describe('runAgent 主循环', () => {
 import { TOOL_SCHEMAS } from '../src/ai/tools.js';
 
 describe('TOOL_SCHEMAS', () => {
-  it('共 9 个工具且命名符合 spec', () => {
+  it('共 10 个工具且命名符合 spec', () => {
     const names = TOOL_SCHEMAS.map((t) => t.function.name);
     expect(names.sort()).toEqual([
       'calculate_indicators', 'get_account', 'get_market_context', 'get_portfolio_risk_snapshot',
-      'get_position', 'get_stock_kline', 'get_stock_quote', 'get_trade_history', 'search_stock',
+      'get_position', 'get_stock_fundamentals', 'get_stock_kline', 'get_stock_quote', 'get_trade_history', 'search_stock',
     ].sort());
   });
   it('工具注册表不含任何下单能力(物理隔离,只有只读工具)', () => {
@@ -209,7 +209,7 @@ describe('TOOL_SCHEMAS', () => {
     for (const f of FORBIDDEN) expect(names).not.toContain(f);
     // 允许的只读类白名单
     const ALLOWED = new Set(names);
-    expect([...ALLOWED]).toHaveLength(9);
+    expect([...ALLOWED]).toHaveLength(10);
   });
 });
 
@@ -220,6 +220,10 @@ describe('executeTool 错误包装', () => {
   });
   it('symbol 格式非法返回 error(get_position)', async () => {
     const r = await executeTool('get_position', { symbol: '不是代码' });
+    expect(r.error).toContain('格式不正确');
+  });
+  it('symbol 格式非法返回 error(get_stock_fundamentals)', async () => {
+    const r = await executeTool('get_stock_fundamentals', { symbol: '不是代码' });
     expect(r.error).toContain('格式不正确');
   });
 });

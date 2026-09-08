@@ -62,8 +62,8 @@ Key 只存在本机,不进项目仓库。AI 只做分析参考、不能替你下
 ## 技术栈
 
 Node.js (Express) · Vue 3 (Vite, Pinia) · klinecharts · 本地 JSON 存储
-数据源:腾讯行情(实时报价/五档、K线、分时、搜索)
-开发命令:`npm test`(123 项单测)/ `npm run dev:server` + `npm run dev:web`(热更新)
+数据源:腾讯行情(实时报价/五档、K线、分时、搜索)+ 新浪财务指标(AI 基本面)
+开发命令:`npm test`(128 项单测)/ `npm run dev:server` + `npm run dev:web`(热更新)
 
 ## 目录结构
 

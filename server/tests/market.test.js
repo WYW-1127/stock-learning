@@ -252,3 +252,87 @@ describe('搜索(腾讯 smartbox)', () => {
     expect(await market.search('不存在的东西xyz')).toEqual([]);
   });
 });
+
+describe('基本面(新浪 vFD 财务指标)', () => {
+  // 页面结构取自 2026-09-09 真机:报告日期行为 plain <td>,指标名在 <a> 内,值为 plain <td>
+  const fundPage = (dates, cells) => {
+    const head = `<tr><td width='200px'><strong>报告日期</strong></td>${dates.map((d) => `<td>${d}</td>`).join('')}</tr>`;
+    const rows = Object.entries(cells)
+      .map(([label, vals]) => `<tr><td width='200px' style='padding-left:30px;'><a target='_blank' href='/corp/view/vFD_FinancialGuideLineHistory.php?stockid=000001&typecode=x'>${label}</a></td>${vals.map((v) => `<td>${v}</td>`).join('')}</tr>`)
+      .join('');
+    return `<html><body><table>${head}${rows}</table></body></html>`;
+  };
+  const sinaRoutes = (pagesByYear) => [[
+    'vFD_FinancialGuideLine',
+    (url) => gbkRes(pagesByYear[Number(url.match(/ctrl\/(\d{4})/)[1])] ?? '<html><body>空页面无表格</body></html>'),
+  ]];
+  const PAGES = {
+    2026: fundPage(['2026-06-30', '2026-03-31'], {
+      '摊薄每股收益(元)': ['1.3241', '0.7484'],
+      '每股净资产_调整前(元)': ['28.2498', '28.037'],
+      '主营业务成本率(%)': ['--', '--'], // 银行股无成本率 → 毛利率 null
+      '销售净利率(%)': ['35.12', '36.01'],
+      '净资产收益率(%)': ['4.85', '2.61'],
+      '主营业务收入增长率(%)': ['-6.03', '-3.51'],
+      '净利润增长率(%)': ['-8.65', '-4.20'],
+      '资产负债率(%)': ['95.5', '95.4'],
+    }),
+    2025: fundPage(['2025-12-31'], {
+      '摊薄每股收益(元)': ['2.60'],
+      '主营业务成本率(%)': ['8.8204'],
+      '净资产收益率(%)': ['9.51'],
+      '主营业务收入增长率(%)': ['-3.61'],
+    }),
+    2024: fundPage(['2024-12-31'], {
+      '摊薄每股收益(元)': ['2.47'],
+      '净资产收益率(%)': ['9.85'],
+      '主营业务收入增长率(%)': ['-3.61'],
+    }),
+  };
+  const clock2026 = () => makeClock(Date.UTC(2026, 8, 9, 2, 0, 0)); // 北京时间 2026-09-09 10:00
+
+  it('解析字段并选最新季报+最近两个年报;缺失/-- 为 null;URL 去掉 sh/sz 前缀', async () => {
+    const fetchImpl = mockFetch(sinaRoutes(PAGES));
+    const market = createMarket({ fetchImpl, now: clock2026().now, retryDelays: [1, 1] });
+    const f = await market.getFundamentals('sz000001');
+    expect(f.symbol).toBe('sz000001');
+    expect(f.periods.map((p) => `${p.date}:${p.type}`)).toEqual(['2026-06-30:中报', '2025-12-31:年报', '2024-12-31:年报']);
+    const [interim, y2025, y2024] = f.periods;
+    expect(interim.eps).toBe(1.32); // round2
+    expect(interim.grossMargin).toBeNull(); // 成本率 '--' → 毛利率 null
+    expect(interim.revenueGrowth).toBe(-6.03);
+    expect(interim.debtRatio).toBe(95.5);
+    expect(interim.bvps).toBe(28.25);
+    expect(y2025.eps).toBe(2.6);
+    expect(y2025.grossMargin).toBe(91.18); // 100 − 8.8204 成本率反推
+    expect(y2024.roe).toBe(9.85);
+    expect(y2024.grossMargin).toBeNull(); // 页面无该指标行 → null
+    expect(fetchImpl.calls.every((u) => u.includes('stockid/000001/'))).toBe(true);
+    expect(fetchImpl.calls).toHaveLength(3); // 3 个年度页各一次
+  });
+
+  it('24h 缓存:期内不重抓,过期后重新拉取', async () => {
+    const clock = clock2026();
+    const fetchImpl = mockFetch(sinaRoutes(PAGES));
+    const market = createMarket({ fetchImpl, now: clock.now, retryDelays: [1, 1] });
+    await market.getFundamentals('sz000001');
+    await market.getFundamentals('sz000001');
+    expect(fetchImpl.calls).toHaveLength(3);
+    clock.advance(24 * 3600 * 1000 + 1);
+    await market.getFundamentals('sz000001');
+    expect(fetchImpl.calls).toHaveLength(6);
+  });
+
+  it('某年页面无数据(如次新股)跳过,其余年份照常返回', async () => {
+    const fetchImpl = mockFetch(sinaRoutes({ ...PAGES, 2024: null })); // null → 命中默认空页
+    const market = createMarket({ fetchImpl, now: clock2026().now, retryDelays: [1, 1] });
+    const f = await market.getFundamentals('sz000001');
+    expect(f.periods.map((p) => `${p.date}:${p.type}`)).toEqual(['2026-06-30:中报', '2025-12-31:年报']);
+  });
+
+  it('三年页面均无报告期 → 抛错(由工具层转 error)', async () => {
+    const fetchImpl = mockFetch(sinaRoutes({}));
+    const market = createMarket({ fetchImpl, now: clock2026().now, retryDelays: [1, 1] });
+    await expect(market.getFundamentals('sz000001')).rejects.toThrow('报告期');
+  });
+});

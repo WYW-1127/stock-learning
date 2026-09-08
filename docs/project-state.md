@@ -1,10 +1,10 @@
 # 项目状态(project-state)
 
-> **每次开发会话:开场先读我,收工必更新我。** 最后更新:2026-09-04
+> **每次开发会话:开场先读我,收工必更新我。** 最后更新:2026-09-09
 
 ## 一句话现状
 
-**AI Investment Agent 全部完成并真机验收通过**(glm-5.3-flash,七场景 S1–S7 全过)。项目 v1 + AI 功能交付。**AI 已改 SSE 流式输出**(思考过程实时显示,质量优先,单次分析约 40-90s)。**2026-09-04:已 Docker 化 + Basic Auth 口令保护,具备云服务器公网部署能力**(docs/deploy.md,待用户实际部署)。
+**AI Investment Agent 全部完成并真机验收通过**(glm-5.3-flash,七场景 S1–S7 全过)。项目 v1 + AI 功能交付。**AI 已改 SSE 流式输出**(思考过程实时显示,质量优先,单次分析约 40-90s)。**2026-09-04:已 Docker 化 + Basic Auth 口令保护,具备云服务器公网部署能力**(docs/deploy.md,待用户实际部署)。**2026-09-09:AI 教练纳入基本面**(新工具 get_stock_fundamentals,新浪财务指标源,E2E 验收通过)。
 
 ## 已完成
 
@@ -23,6 +23,8 @@
 - [x] **T7 联调收尾**:服务端 EADDRINUSE 友好提示(端口被占给人话指引,实测生效);README 更新为正式快速开始+常见问题;**手动清单浏览器回归全过**——复盘统计与手算一致(预置买卖用例:胜率100%/+984.29/持有2天)、持仓页数字勾稽(总盈亏=已实现+浮动)、重置双确认(错填拦截/输"重置"通过/自选保留)、新手引导 6 步走通、术语卡弹出(换手率)、盘后角标(T6 已验);76/76 单测全绿。**未真实验证项**:断网横幅(代码路径在:quotesError→degraded banner,上游故障自动触发,待自然发生观察);周一盘中 live 模式与 T+1 解锁
 - [x] **AI 流式改造(2026-09-02 用户反馈"分析慢"后)**:①`/api/ai/chat` 支持 SSE(前端 `stream:true`),GLM 思考过程 + 工具进度实时显示在 AiChat 折叠面板,answer 后自动收起;②GLM-5.3 不支持关思考(官方禁止 disabled),默认思考开满质量优先,`reasoningEffort` 配置可降档(不建议);③防编造闸门:零工具带数据 → 打回重查(1次),仍不查 → 拦截;④工具触顶 12 次改为"基于已查数据强制收尾"(不再让用户拆小);⑤同轮多工具 Promise.all 并行 + prompt 批量调用/禁重复调用;⑥S5 触发过 14 次工具触顶,修复后 S5 单测+真机均过(tools=4)。真机验收:S1-S4/S6/S7 数字与账户完全一致,S5 通过;单次 40-90s(思考开满);117 单测全绿;SSE 解析(tool_calls 分片拼装/type 补齐)有专属单测 ai-sse.test.js。**浏览器实测未做**(IAB webview 未就绪),前端渲染待用户刷新页面自然验证
 - [x] **Docker 化 + 公网部署能力(2026-09-04)**:①`server/src/auth.js` Basic Auth 中间件——`AUTH_USER`+`AUTH_PASS` 都配置才启用,不配置与本地行为完全一致;`/api/meta/status` 白名单(免口令供 healthcheck);timingSafeEqual 防时序;前端零改动(浏览器缓存凭据后 fetch/SSE 同源自动带上);新增 6 单测。②多阶段 `Dockerfile`(web 构建层 → node:22-alpine 运行层,**tzdata + TZ=Asia/Shanghai 时区关键**、NODE_ENV、DATA_DIR=/data、VOLUME、非 root node 用户、镜像内预建 /data 并 chown)。③`docker-compose.yml`(./data:/data 数据卷、.env 注入口令/AI key、healthcheck、restart: unless-stopped)。④`.env.example` + .gitignore 加 .env(密钥不入库红线)。⑤`docs/deploy.md` 部署指南(路线A服务器clone构建/路线B本机save-scp-load、.env 说明、运维命令、Caddy HTTPS 可选、国内镜像加速)。⑥清理 server/web package.json 中代码从未引用的 `"stock-learning": "file:.."` 自引用依赖并重生成两份 lock(否则 Docker 内 npm ci 失败);README 加部署入口、单测数修正 76→123。**验证**:123 单测全绿;本机构建+临时容器冒烟全过——无凭据 401/错误密码 401/白名单 200/带凭据页面与 API 200/账户初始 10 万/marketOk:true/AI configured:false/**容器内时区 CST 正确(周五 12:38 判 afterHours 系午休,口径与本地一致)**/无 AUTH 容器全放行。**三个坑**:①Docker Hub 本机直连被墙 → `docker pull docker.m.daocloud.io/library/node:22-alpine` 后 tag 改名(不动用户 Docker 全局配置);②非 root 容器写匿名卷 /data 报 EACCES → 镜像内 `RUN mkdir -p /data && chown node:node /data`(bind mount 宿主目录仍需 `chown 1000:1000`,已写入 deploy.md);③一次 package.json 编辑被外部进程静默还原(疑似 npm 与编辑竞态)→ 重改后必须立即 grep 验证落盘
+
+- [x] **AI 教练纳入基本面(2026-09-09)**:①market.js 新增 `getFundamentals`——新浪财经 vFD 财务指标页(GB2312 HTML,Node fetch 直连实测通过),并行抓 当年+前两年 共 3 页(~500ms),解析出最近两个年报+最新季报列的 9 项指标(EPS/每股净资产/每股经营现金流/毛利率/净利率/ROE/营收增长率/净利增长率/资产负债率),24h 缓存;某年页空/失败跳过,全失败抛错由工具层转 error。②tools.js 第 10 个工具 `get_stock_fundamentals`(纯只读):基本面+实时 PE/PB/总市值一次拿全;工具超时按工具差异化(基本面 8s,其余 3s)。③提示词:标准分析路径加基本面工具、新铁律"买卖/持有判断必须结合基本面"、教练风格加"技术面与基本面冲突时如实分说"。④**数据坑两枚**:新浪"销售毛利率"近年停更(全 --)→ 用 100−主营业务成本率反推(茅台 2025 反推 91.18% 与真实一致,银行无成本率则 null);market.js 模块级 round2 无判空守卫(round2(null)=0)→ 解析处先 Number.isFinite 守卫。⑤**验收**:128 单测全绿(+5);工具直调平安/茅台数据合理;E2E 茅台综合分析 5 工具链含基本面、facts 数字全真、结论"基本面顶级但成长放缓+技术面偏弱"冲突如实分说、不代客交易提示在。数据源探测淘汰:腾讯 F10 无公开路径/网易 502/同花顺 403(详见 architecture.md §1 2026-09-09 条)
 
 ## 下一步(按序)
 
@@ -83,3 +85,4 @@
 - 2026-09-02:用户反馈"AI 分析太慢"→ 先做低思考档提速(reasoning_effort=low+并行工具+批量 prompt),实测提速但**诱发模型零工具编造持仓数字**(1700股等,防编造回归);用户改口"久一点没关系,把思考过程显示出来"→ 定稿:**恢复思考开满 + SSE 流式输出思考过程**(llm.chatCompletionStream/agent.onEvent/路由 SSE/前端折叠面板),保留无损优化(同轮工具并行、批量调用、防编造闸门、触顶强制收尾);修智谱流式 tool_calls 缺 type 导致 1214 的坑;S1-S7 复验数字全真;117 单测全绿。决策详见 architecture.md §1 两条 2026-09-02 新条目。遗留:前端思考流 UI 的浏览器目测验证未做(IAB webview 未就绪)
 - 2026-09-04:用户要求"打包成 Docker 镜像部署到服务器,公网仅自己访问"→ Docker 化 + Basic Auth 全套落地(auth.js 中间件+6单测/多阶段 Dockerfile 含 TZ=Asia/Shanghai 时区坑/docker-compose 数据卷+.env 密钥注入/docs/deploy.md 两条部署路线);清理 server/web 从未引用的 `file:..` 自引用依赖(重生成 lock);123 单测全绿 + 本机构建冒烟全过(鉴权/白名单/时区 CST/无 AUTH 全放行)。冒烟撞坑三枚:Docker Hub 被墙走 daocloud 镜像源、非 root 容器 /data EACCES 镜像内预 chown、package.json 编辑被外部进程还原需即时验证落盘。待用户在服务器实际部署(deploy.md 路线 A/B)
 - 2026-09-07:用户截图反馈 AI 教练 facts 卡片排版乱(标签被挤成逐字竖排)→ 根因:`.ai-facts` 两列 grid 在 440px 抽屉里每列仅 ~170px,`.fact` 横向 flex + space-between 把标签挤压竖排;修复为单列 key-value 行(标签 `flex:0 0 auto`+nowrap+min-width 4em,值 `flex:1` 换行悬挂对齐),前端已重建 dist。IAB webview 仍未就绪,改用"最小验证页 + Edge 无头截图"完成目测验证(标签单行/列对齐/长句换行对齐全部达标),临时文件已清理
+- 2026-09-09:用户要求 AI 综合分析加上基本面 → 落地 `get_stock_fundamentals` 工具(新浪 vFD 财务指标源,3 年页并行 + 24h 缓存,最近两年报+最新季报 9 项指标 + 实时 PE/PB/市值),提示词纳入综合判断;撞坑:新浪销售毛利率停更用成本率反推、market.js round2 无判空守卫;128 单测全绿 + 工具直调与 E2E 验收通过(细节见"已完成"对应条目与 architecture.md §1)。**待用户自然验证**:前端问个股买卖问题,确认 facts 卡片出现基本面数字、结论融合两面信号

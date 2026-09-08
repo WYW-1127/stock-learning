@@ -1,4 +1,4 @@
-// Agent 工具层 — 9 个工具的 LLM schema 定义 + 进程内执行分发
+// Agent 工具层 — 10 个工具的 LLM schema 定义 + 进程内执行分发
 // 铁律:①工具注册表不含任何下单能力(物理隔离);②依赖 symbol 的工具不做名称猜测,
 //      名称→代码由 LLM 先调 search_stock 解决(实体解析在运行时,不硬编码映射表)
 import { market } from '../market.js';
@@ -92,6 +92,20 @@ export const TOOL_SCHEMAS = [
         properties: {
           symbol: { type: 'string' },
           period: { type: 'string', enum: ['day', 'week'] },
+        },
+        required: ['symbol'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'get_stock_fundamentals',
+      description: '获取个股基本面:最近两个年报+最新季报的每股收益/每股净资产/每股经营现金流、毛利率、净利率、ROE、营收与净利润同比增长率、资产负债率,以及当前 PE/PB/总市值(实时口径)。涉及个股买卖/持有判断时必须结合本工具看基本面。',
+      parameters: {
+        type: 'object',
+        properties: {
+          symbol: { type: 'string', description: '规范代码,如 sz000001(先经 search_stock 获得)' },
         },
         required: ['symbol'],
       },
@@ -215,6 +229,27 @@ const EXECUTORS = {
     return { symbol: s, ...calcIndicators(bars) };
   },
 
+  async get_stock_fundamentals({ symbol }) {
+    const s = String(symbol || '').toLowerCase();
+    if (!SYMBOL_RE.test(s)) return { error: `symbol 格式不正确:${symbol}` };
+    const [fund, quote] = await Promise.all([
+      market.getFundamentals(s).catch(() => null),
+      market.getQuotes([s]).catch(() => ({})),
+    ]);
+    if (!fund) return { error: `获取 ${symbol} 基本面数据失败(新浪财务指标暂不可用),可继续基于技术面分析并说明基本面暂缺` };
+    const q = quote[s] || {};
+    return {
+      ...fund,
+      name: q.name ?? null,
+      valuation: {
+        pe: q.pe ?? null,
+        pb: q.pb ?? null,
+        totalMarketCapYi: q.totalMv ?? null, // 亿元
+      },
+      valuationNote: 'PE/PB/总市值为实时报价口径,与财务指标的报告期不同步属正常;增长率为该报告期同比',
+    };
+  },
+
   async get_market_context() {
     const [indices, status] = await Promise.all([
       market.getIndices().catch(() => []),
@@ -262,6 +297,9 @@ const EXECUTORS = {
   },
 };
 
+// 个别工具的专属超时(ms):基本面需并行抓新浪 3 个年度页,默认 3s 偏紧
+const TOOL_TIMEOUT_MS = { get_stock_fundamentals: 8000 };
+
 /**
  * 执行一次工具调用
  * @returns {Promise<object>} 工具结果(含 error 字段表示业务失败;执行异常包装为 error 不抛出)
@@ -269,10 +307,11 @@ const EXECUTORS = {
 export async function executeTool(name, args = {}) {
   const fn = EXECUTORS[name];
   if (!fn) return { error: `未知工具:${name}` };
+  const timeoutMs = TOOL_TIMEOUT_MS[name] || 3000;
   try {
     return await Promise.race([
       fn(args),
-      new Promise((_, rej) => setTimeout(() => rej(new Error('工具执行超时(3s)')), 3000)),
+      new Promise((_, rej) => setTimeout(() => rej(new Error(`工具执行超时(${timeoutMs / 1000}s)`)), timeoutMs)),
     ]);
   } catch (err) {
     return { error: `工具执行失败:${err.message}` };

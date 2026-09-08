@@ -1,7 +1,8 @@
-// 行情服务 — 腾讯实时报价/五档/涨跌停(GBK)、腾讯 K线/分时(ifzq)、东财搜索(suggest)
+// 行情服务 — 腾讯实时报价/五档/涨跌停(GBK)、腾讯 K线/分时(ifzq)、腾讯搜索(smartbox)、新浪财务指标(基本面)
 // 注:K线原计划用东财 push2his,实测该域名族在本机网络直连不可达(开/关代理均如此),
-//     而腾讯 ifzq 与东财 searchapi 实测稳定,故 K线/分时切腾讯、搜索留东财(决策记录见 architecture.md §1)
-// 缓存:报价 3s TTL(按只);日K 当日有效;周K 60s;分时 5s
+//     而腾讯 ifzq 与腾讯 smartbox 实测稳定,故 K线/分时/搜索全在腾讯;基本面用新浪
+//     (2026-09-09 探测:腾讯 F10 无公开稳定路径、网易 502、同花顺 403,新浪 Node fetch 实测通过,决策记录见 architecture.md §1)
+// 缓存:报价 3s TTL(按只);日K 当日有效;周K 60s;分时 5s;基本面 24h(财报按报告期更新)
 // 上游:5s 超时,失败重试×2(退避 500ms/1s),重试仍失败则抛错,由路由层降级处理
 import iconv from 'iconv-lite';
 import { boardOf } from './engine/fees.js';
@@ -33,6 +34,7 @@ export function createMarket(options = {}) {
     quotesTtlMs = 3000,
     minuteTtlMs = 5000,
     weekTtlMs = 60000,
+    fundamentalsTtlMs = 24 * 3600 * 1000,
   } = options;
 
   // 请求文本:超时 + 重试;gbk=true 时按 GBK 解码(腾讯行情接口)
@@ -230,7 +232,86 @@ export function createMarket(options = {}) {
       });
   }
 
-  return { getQuotes, getIndices, getKline, getTradingDates, getMinuteTimeline, search };
+  // ---- 新浪财务指标(基本面) ----
+  // 页面结构(GB2312 HTML):指标名为行(带 <a> 链接)、报告期为列;某年无数据时无"报告日期"行
+  // 抓 当年+前两年 共 3 页并行,合并后取最近两个年报列 + 最新非年报报告期(季报)列
+  // 新浪只用 6 位代码(sh/sz 前缀去掉);容错:某年页失败/为空跳过,全失败才抛错
+  const FUND_FIELDS = [
+    ['eps', '摊薄每股收益(元)'],
+    ['bvps', '每股净资产_调整前(元)'],
+    ['ocfps', '每股经营性现金流(元)'],
+    ['grossMargin', '主营业务成本率(%)'], // 新浪"销售毛利率"近年停更(全 --),用 100−成本率还原
+    ['netMargin', '销售净利率(%)'],
+    ['roe', '净资产收益率(%)'],
+    ['revenueGrowth', '主营业务收入增长率(%)'],
+    ['netProfitGrowth', '净利润增长率(%)'],
+    ['debtRatio', '资产负债率(%)'],
+  ];
+  const REPORT_TYPES = { '03-31': '一季报', '06-30': '中报', '09-30': '三季报', '12-31': '年报' };
+
+  // 解析单年页面;无报告期行返回 null
+  function parseFundPage(html) {
+    const dateRow = html.match(/报告日期<\/strong><\/td>((?:<td>[^<]*<\/td>)+)/);
+    if (!dateRow) return null;
+    const dates = [...dateRow[1].matchAll(/<td>(\d{4}-\d{2}-\d{2})<\/td>/g)].map((m) => m[1]);
+    if (!dates.length) return null;
+    const cols = {};
+    for (const [key, label] of FUND_FIELDS) {
+      const esc = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // 指标名含 ()% 等正则元字符
+      const row = html.match(new RegExp(`<td width='200px'[^>]*><a[^>]*>${esc}</a></td>((?:<td>[^<]*</td>)+)`));
+      if (!row) continue;
+      cols[key] = [...row[1].matchAll(/<td>([^<]*)<\/td>/g)].map((m) => {
+        const v = Number.parseFloat(m[1]);
+        return Number.isFinite(v) ? v : null; // '--'/空 → null(如银行股毛利率常缺)
+      });
+    }
+    return { dates, cols };
+  }
+
+  const fundamentalsCache = new Map(); // symbol → { at, data }
+
+  // 返回 { symbol, periods: [ { date, type, eps, bvps, ..., debtRatio } ] }(按报告期倒序,季报在前)
+  async function getFundamentals(symbol) {
+    const s = String(symbol || '').toLowerCase();
+    const t = now();
+    const cached = fundamentalsCache.get(s);
+    if (cached && t - cached.at < fundamentalsTtlMs) return cached.data;
+
+    const year = new Date(t).getFullYear();
+    const code = s.replace(/^sh/, '').replace(/^sz/, '');
+    const results = await Promise.allSettled(
+      [year, year - 1, year - 2].map((y) =>
+        fetchText(
+          `https://money.finance.sina.com.cn/corp/go.php/vFD_FinancialGuideLine/stockid/${code}/ctrl/${y}/displaytype/4.phtml`,
+          { gbk: true },
+        ).then(parseFundPage),
+      ),
+    );
+    const byDate = new Map();
+    for (const r of results) {
+      if (r.status !== 'fulfilled' || !r.value) continue;
+      r.value.dates.forEach((d, i) => {
+        if (byDate.has(d)) return;
+        const period = { date: d };
+        for (const [key] of FUND_FIELDS) {
+          const v = r.value.cols[key]?.[i];
+          period[key] = Number.isFinite(v) ? round2(v) : null; // round2 不判空,须先守卫
+        }
+        if (Number.isFinite(period.grossMargin)) period.grossMargin = round2(100 - period.grossMargin); // 成本率 → 毛利率
+        byDate.set(d, period);
+      });
+    }
+    const all = [...byDate.values()].sort((a, b) => (a.date < b.date ? 1 : -1));
+    const annuals = all.filter((p) => p.date.endsWith('12-31')).slice(0, 2);
+    const interim = all.find((p) => !p.date.endsWith('12-31'));
+    const periods = [interim, ...annuals].filter(Boolean).map((p) => ({ ...p, type: REPORT_TYPES[p.date.slice(5)] || '报告' }));
+    if (!periods.length) throw new Error('基本面页面无可解析的报告期');
+    const data = { symbol: s, periods };
+    fundamentalsCache.set(s, { at: t, data });
+    return data;
+  }
+
+  return { getQuotes, getIndices, getKline, getTradingDates, getMinuteTimeline, search, getFundamentals };
 }
 
 // 默认实例
