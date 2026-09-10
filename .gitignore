@@ -4,3 +4,4 @@ web/dist/
 *.log
 .env
 .zcode/
+server/evals/fixture/chat.json*

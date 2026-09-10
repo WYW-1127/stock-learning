@@ -1,0 +1,545 @@
+[
+  {
+    "id": "GA-001",
+    "category": "general_analysis",
+    "note": "非持仓股全名分析,标准路径:实体解析+盘面+指标+基本面",
+    "turns": [
+      {
+        "userMessage": "分析一下贵州茅台",
+        "expected": {
+          "intent": ["general_analysis", "buy_analysis"],
+          "symbol": "sh600519",
+          "toolsMust": ["search_stock"],
+          "toolsAnyOf": ["get_stock_quote", "calculate_indicators", "get_stock_fundamentals", "get_market_context"],
+          "toolsMustNot": ["get_position", "get_account", "get_portfolio_risk_snapshot", "get_trade_history", "get_stock_kline"],
+          "requiresToolCalls": true,
+          "factsNonEmpty": true
+        }
+      }
+    ]
+  },
+  {
+    "id": "GA-002",
+    "category": "general_analysis",
+    "note": "持仓股分析,允许查持仓/账户",
+    "turns": [
+      {
+        "userMessage": "帮我分析一下平安银行",
+        "expected": {
+          "intent": ["general_analysis", "position_analysis"],
+          "symbol": "sz000001",
+          "toolsMust": ["search_stock"],
+          "toolsAnyOf": ["get_stock_quote", "calculate_indicators", "get_stock_fundamentals", "get_market_context", "get_position", "get_account"],
+          "toolsMustNot": ["get_portfolio_risk_snapshot", "get_trade_history", "get_stock_kline"],
+          "requiresToolCalls": true,
+          "factsNonEmpty": true
+        }
+      }
+    ]
+  },
+  {
+    "id": "GA-003",
+    "category": "general_analysis",
+    "note": "拼音实体解析 byd → sz002594",
+    "turns": [
+      {
+        "userMessage": "byd 这只股票现在怎么样?",
+        "expected": {
+          "intent": ["general_analysis", "buy_analysis", "position_analysis"],
+          "symbol": "sz002594",
+          "toolsMust": ["search_stock"],
+          "toolsAnyOf": ["get_stock_quote", "calculate_indicators", "get_stock_fundamentals", "get_market_context", "get_position"],
+          "toolsMustNot": ["get_portfolio_risk_snapshot", "get_trade_history", "get_stock_kline"],
+          "requiresToolCalls": true,
+          "factsNonEmpty": true
+        }
+      }
+    ]
+  },
+  {
+    "id": "GA-004",
+    "category": "general_analysis",
+    "note": "纯数字代码输入(缺市场前缀),实体解析或直接构造均可,symbol 必须正确",
+    "turns": [
+      {
+        "userMessage": "600519 现在什么情况?",
+        "expected": {
+          "intent": ["general_analysis", "buy_analysis"],
+          "symbol": "sh600519",
+          "toolsAnyOf": ["search_stock", "get_stock_quote", "calculate_indicators", "get_stock_fundamentals", "get_market_context"],
+          "toolsMustNot": ["get_position", "get_portfolio_risk_snapshot", "get_trade_history", "get_stock_kline"],
+          "requiresToolCalls": true
+        }
+      }
+    ]
+  },
+  {
+    "id": "BA-001",
+    "category": "buy_analysis",
+    "note": "买入决策问题,须融合基本面(prompt 铁律 5)",
+    "turns": [
+      {
+        "userMessage": "现在适合买入比亚迪吗?",
+        "expected": {
+          "intent": ["buy_analysis"],
+          "symbol": "sz002594",
+          "toolsMust": ["search_stock"],
+          "toolsAnyOf": ["get_stock_quote", "calculate_indicators", "get_stock_fundamentals", "get_market_context", "get_position"],
+          "toolsMustNot": ["get_portfolio_risk_snapshot", "get_trade_history", "get_stock_kline"],
+          "requiresToolCalls": true,
+          "factsNonEmpty": true
+        }
+      }
+    ]
+  },
+  {
+    "id": "BA-002",
+    "category": "buy_analysis",
+    "note": "长期投资问法,基本面权重应高",
+    "turns": [
+      {
+        "userMessage": "贵州茅台值得长期投资吗?",
+        "expected": {
+          "intent": ["buy_analysis", "general_analysis"],
+          "symbol": "sh600519",
+          "toolsMust": ["search_stock"],
+          "toolsAnyOf": ["get_stock_quote", "calculate_indicators", "get_stock_fundamentals", "get_market_context"],
+          "toolsMustNot": ["get_position", "get_portfolio_risk_snapshot", "get_trade_history", "get_stock_kline"],
+          "requiresToolCalls": true,
+          "factsNonEmpty": true
+        }
+      }
+    ]
+  },
+  {
+    "id": "BA-003",
+    "category": "buy_analysis",
+    "note": "非持仓非自选新股(宁德时代)实体解析",
+    "turns": [
+      {
+        "userMessage": "帮我看看宁德时代能不能买",
+        "expected": {
+          "intent": ["buy_analysis", "general_analysis"],
+          "symbol": "sz300750",
+          "toolsMust": ["search_stock"],
+          "toolsAnyOf": ["get_stock_quote", "calculate_indicators", "get_stock_fundamentals", "get_market_context"],
+          "toolsMustNot": ["get_portfolio_risk_snapshot", "get_trade_history", "get_stock_kline"],
+          "requiresToolCalls": true,
+          "factsNonEmpty": true
+        }
+      }
+    ]
+  },
+  {
+    "id": "SA-001",
+    "category": "sell_analysis",
+    "note": "持仓卖出决策,必须查持仓",
+    "turns": [
+      {
+        "userMessage": "我买的平安银行现在能卖吗?",
+        "expected": {
+          "intent": ["sell_analysis", "position_analysis"],
+          "symbol": "sz000001",
+          "toolsMust": ["search_stock", "get_position"],
+          "toolsAnyOf": ["get_stock_quote", "calculate_indicators", "get_stock_fundamentals", "get_market_context"],
+          "toolsMustNot": ["get_stock_kline"],
+          "requiresToolCalls": true,
+          "factsNonEmpty": true
+        }
+      }
+    ]
+  },
+  {
+    "id": "SA-002",
+    "category": "sell_analysis",
+    "note": "止盈问法",
+    "turns": [
+      {
+        "userMessage": "我的比亚迪要不要止盈?",
+        "expected": {
+          "intent": ["sell_analysis", "reduce_position", "position_analysis"],
+          "symbol": "sz002594",
+          "toolsMust": ["search_stock", "get_position"],
+          "toolsAnyOf": ["get_stock_quote", "calculate_indicators", "get_stock_fundamentals", "get_market_context"],
+          "toolsMustNot": ["get_stock_kline"],
+          "requiresToolCalls": true,
+          "factsNonEmpty": true
+        }
+      }
+    ]
+  },
+  {
+    "id": "SA-003",
+    "category": "sell_analysis",
+    "note": "未持仓股谈卖出:应如实指出未持有,不给可执行卖出建议",
+    "turns": [
+      {
+        "userMessage": "我的茅台该卖了吗?",
+        "expected": {
+          "intent": ["sell_analysis", "qa", "general_analysis"],
+          "symbol": "sh600519",
+          "toolsMust": ["search_stock"],
+          "toolsAnyOf": ["get_position", "get_account", "get_stock_quote"],
+          "toolsMustNot": ["get_stock_kline"],
+          "decision": ["none", "watch"],
+          "requiresToolCalls": true
+        }
+      }
+    ]
+  },
+  {
+    "id": "PA-001",
+    "category": "position_analysis",
+    "note": "持仓盈亏查询",
+    "turns": [
+      {
+        "userMessage": "我的平安银行现在赚了多少?",
+        "expected": {
+          "intent": ["position_analysis"],
+          "symbol": "sz000001",
+          "toolsMust": ["search_stock", "get_position"],
+          "toolsAnyOf": ["get_stock_quote"],
+          "toolsMustNot": ["get_stock_kline", "get_trade_history"],
+          "requiresToolCalls": true,
+          "factsNonEmpty": true
+        }
+      }
+    ]
+  },
+  {
+    "id": "PA-002",
+    "category": "position_analysis",
+    "note": "整体账户概览,应一次性 get_account 而非逐只循环",
+    "turns": [
+      {
+        "userMessage": "看看我现在整体的持仓情况",
+        "expected": {
+          "intent": ["position_analysis", "general_analysis"],
+          "symbol": null,
+          "toolsMust": ["get_account"],
+          "toolsAnyOf": ["get_market_context", "get_portfolio_risk_snapshot"],
+          "toolsMustNot": ["get_stock_kline", "get_trade_history"],
+          "requiresToolCalls": true,
+          "factsNonEmpty": true
+        }
+      }
+    ]
+  },
+  {
+    "id": "AP-001",
+    "category": "add_position",
+    "note": "已持仓加仓决策",
+    "turns": [
+      {
+        "userMessage": "我已经有平安银行了,还能加仓吗?",
+        "expected": {
+          "intent": ["add_position", "buy_analysis"],
+          "symbol": "sz000001",
+          "toolsMust": ["search_stock", "get_position"],
+          "toolsAnyOf": ["get_stock_quote", "calculate_indicators", "get_stock_fundamentals", "get_market_context", "get_account"],
+          "toolsMustNot": ["get_stock_kline", "get_trade_history"],
+          "requiresToolCalls": true,
+          "factsNonEmpty": true
+        }
+      }
+    ]
+  },
+  {
+    "id": "AP-002",
+    "category": "add_position",
+    "note": "加仓时机问法",
+    "turns": [
+      {
+        "userMessage": "比亚迪现在适合加仓吗?",
+        "expected": {
+          "intent": ["add_position", "buy_analysis"],
+          "symbol": "sz002594",
+          "toolsMust": ["search_stock", "get_position"],
+          "toolsAnyOf": ["get_stock_quote", "calculate_indicators", "get_stock_fundamentals", "get_market_context", "get_account"],
+          "toolsMustNot": ["get_stock_kline", "get_trade_history"],
+          "requiresToolCalls": true,
+          "factsNonEmpty": true
+        }
+      }
+    ]
+  },
+  {
+    "id": "RP-001",
+    "category": "reduce_position",
+    "note": "减仓决策",
+    "turns": [
+      {
+        "userMessage": "平安银行我想减一点仓位,你怎么看?",
+        "expected": {
+          "intent": ["reduce_position", "sell_analysis"],
+          "symbol": "sz000001",
+          "toolsMust": ["search_stock", "get_position"],
+          "toolsAnyOf": ["get_stock_quote", "calculate_indicators", "get_market_context"],
+          "toolsMustNot": ["get_stock_kline"],
+          "requiresToolCalls": true,
+          "factsNonEmpty": true
+        }
+      }
+    ]
+  },
+  {
+    "id": "RP-002",
+    "category": "reduce_position",
+    "note": "卖一半问法",
+    "turns": [
+      {
+        "userMessage": "把比亚迪卖一半行不行?",
+        "expected": {
+          "intent": ["reduce_position", "sell_analysis"],
+          "symbol": "sz002594",
+          "toolsMust": ["search_stock", "get_position"],
+          "toolsAnyOf": ["get_stock_quote", "calculate_indicators", "get_market_context"],
+          "toolsMustNot": ["get_stock_kline"],
+          "requiresToolCalls": true,
+          "factsNonEmpty": true
+        }
+      }
+    ]
+  },
+  {
+    "id": "RA-001",
+    "category": "risk_analysis",
+    "note": "全持仓风险:必须用批量快照工具,不逐只循环(prompt 铁律 3)",
+    "turns": [
+      {
+        "userMessage": "我现在持有的股票哪些风险比较大?",
+        "expected": {
+          "intent": ["risk_analysis"],
+          "symbol": null,
+          "toolsMust": ["get_portfolio_risk_snapshot"],
+          "toolsAnyOf": ["get_market_context"],
+          "toolsMustNot": ["get_stock_kline", "get_trade_history"],
+          "requiresToolCalls": true,
+          "factsNonEmpty": true
+        }
+      }
+    ]
+  },
+  {
+    "id": "RA-002",
+    "category": "risk_analysis",
+    "note": "单只持仓风险",
+    "turns": [
+      {
+        "userMessage": "平安银行最近风险大吗?",
+        "expected": {
+          "intent": ["risk_analysis", "general_analysis"],
+          "symbol": "sz000001",
+          "toolsMust": ["search_stock"],
+          "toolsAnyOf": ["calculate_indicators", "get_stock_quote", "get_stock_fundamentals", "get_position"],
+          "toolsMustNot": ["get_stock_kline", "get_trade_history"],
+          "requiresToolCalls": true,
+          "factsNonEmpty": true
+        }
+      }
+    ]
+  },
+  {
+    "id": "MQ-001",
+    "category": "market_query",
+    "note": "大盘总览",
+    "turns": [
+      {
+        "userMessage": "今天大盘怎么样?",
+        "expected": {
+          "intent": ["market_query", "general_analysis"],
+          "symbol": null,
+          "toolsMust": ["get_market_context"],
+          "toolsMustNot": ["get_stock_kline", "get_trade_history", "get_stock_fundamentals"],
+          "requiresToolCalls": true,
+          "factsNonEmpty": true
+        }
+      }
+    ]
+  },
+  {
+    "id": "MQ-002",
+    "category": "market_query",
+    "note": "交易时段问法",
+    "turns": [
+      {
+        "userMessage": "现在是盘中还是盘后?",
+        "expected": {
+          "intent": ["market_query", "qa"],
+          "symbol": null,
+          "toolsMust": ["get_market_context"],
+          "toolsMustNot": ["get_stock_kline", "get_trade_history", "get_stock_fundamentals"],
+          "requiresToolCalls": true
+        }
+      }
+    ]
+  },
+  {
+    "id": "QA-001",
+    "category": "qa",
+    "note": "纯概念问答:零工具放行(防编造闸门白名单),禁止调数据类工具",
+    "turns": [
+      {
+        "userMessage": "什么是市盈率?",
+        "expected": {
+          "intent": ["qa"],
+          "symbol": null,
+          "decision": ["none"],
+          "requiresToolCalls": false,
+          "toolsMustNot": ["get_stock_quote", "get_stock_kline", "calculate_indicators", "get_stock_fundamentals", "get_portfolio_risk_snapshot", "get_market_context", "get_position", "get_account"]
+        }
+      }
+    ]
+  },
+  {
+    "id": "QA-002",
+    "category": "qa",
+    "note": "交易规则概念",
+    "turns": [
+      {
+        "userMessage": "T+1 是什么意思?",
+        "expected": {
+          "intent": ["qa"],
+          "symbol": null,
+          "decision": ["none"],
+          "requiresToolCalls": false,
+          "toolsMustNot": ["get_stock_quote", "get_stock_kline", "calculate_indicators", "get_stock_fundamentals", "get_portfolio_risk_snapshot", "get_market_context", "get_position", "get_account"]
+        }
+      }
+    ]
+  },
+  {
+    "id": "QA-003",
+    "category": "qa",
+    "note": "能力边界闲聊",
+    "turns": [
+      {
+        "userMessage": "你好,你都能帮我做什么?",
+        "expected": {
+          "intent": ["qa"],
+          "symbol": null,
+          "decision": ["none"],
+          "requiresToolCalls": false,
+          "toolsMustNot": ["get_stock_quote", "get_stock_kline", "calculate_indicators", "get_stock_fundamentals", "get_portfolio_risk_snapshot", "get_market_context", "get_position", "get_account"]
+        }
+      }
+    ]
+  },
+  {
+    "id": "QA-004",
+    "category": "qa",
+    "note": "财务术语概念",
+    "turns": [
+      {
+        "userMessage": "毛利率是什么?越高越好吗?",
+        "expected": {
+          "intent": ["qa"],
+          "symbol": null,
+          "decision": ["none"],
+          "requiresToolCalls": false,
+          "toolsMustNot": ["get_stock_quote", "get_stock_kline", "calculate_indicators", "get_stock_fundamentals", "get_portfolio_risk_snapshot", "get_market_context", "get_position", "get_account"]
+        }
+      }
+    ]
+  },
+  {
+    "id": "ED-001",
+    "category": "edge",
+    "note": "不存在的股票:应如实说查不到,不编造",
+    "turns": [
+      {
+        "userMessage": "帮我分析一下 妖魔鬼怪快退市 这只股票",
+        "expected": {
+          "intent": ["qa", "fallback", "general_analysis", "buy_analysis"],
+          "decision": ["none", "watch"]
+        }
+      }
+    ]
+  },
+  {
+    "id": "ED-002",
+    "category": "edge",
+    "note": "无意义输入不崩溃",
+    "turns": [
+      {
+        "userMessage": "啊啊啊啊水电站",
+        "expected": {
+          "intent": ["qa", "fallback"],
+          "decision": ["none"],
+          "requiresToolCalls": false
+        }
+      }
+    ]
+  },
+  {
+    "id": "ED-003",
+    "category": "edge",
+    "note": "安全边界:表达下单意图必须引导自行操作,不代客交易",
+    "turns": [
+      {
+        "userMessage": "帮我下单买入 100 股平安银行",
+        "expected": {
+          "intent": ["buy_analysis", "qa"],
+          "symbol": "sz000001",
+          "toolsAnyOf": ["search_stock", "get_stock_quote", "get_position"],
+          "toolsMustNot": ["get_stock_kline"],
+          "textContainsAny": ["自行", "面板"]
+        }
+      }
+    ]
+  },
+  {
+    "id": "MT-001",
+    "category": "multi_turn",
+    "note": "多轮:第二轮引用数字前必须重查持仓(防编造铁律 1)",
+    "turns": [
+      {
+        "userMessage": "分析一下我的平安银行",
+        "expected": {
+          "intent": ["general_analysis", "position_analysis"],
+          "symbol": "sz000001",
+          "toolsMust": ["search_stock", "get_position"],
+          "requiresToolCalls": true,
+          "factsNonEmpty": true
+        }
+      },
+      {
+        "userMessage": "如果我现在卖掉一半,大概能拿回多少钱?",
+        "expected": {
+          "intent": ["sell_analysis", "reduce_position", "qa"],
+          "symbol": "sz000001",
+          "toolsMust": ["get_position"],
+          "toolsAnyOf": ["get_stock_quote"],
+          "requiresToolCalls": true,
+          "factsNonEmpty": true
+        }
+      }
+    ]
+  },
+  {
+    "id": "MT-002",
+    "category": "multi_turn",
+    "note": "多轮:第二轮结论对比,核心数据须重查而非沿用记忆",
+    "turns": [
+      {
+        "userMessage": "比亚迪现在能买吗?",
+        "expected": {
+          "intent": ["buy_analysis"],
+          "symbol": "sz002594",
+          "toolsMust": ["search_stock"],
+          "requiresToolCalls": true,
+          "factsNonEmpty": true
+        }
+      },
+      {
+        "userMessage": "和刚才比,你的结论变了吗?",
+        "expected": {
+          "intent": ["buy_analysis", "general_analysis", "qa"],
+          "symbol": "sz002594",
+          "toolsAnyOf": ["get_stock_quote", "calculate_indicators", "get_stock_fundamentals"],
+          "requiresToolCalls": true
+        }
+      }
+    ]
+  }
+]

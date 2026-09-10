@@ -1,0 +1,154 @@
+{
+  "meta": {
+    "date": "2026-09-10",
+    "model": "glm-5.3-flash"
+  },
+  "summary": {
+    "totalTurns": 31,
+    "totalCases": 29,
+    "casePassRate": 48.3,
+    "turnPassRate": 45.2,
+    "intentAccuracy": 100,
+    "toolSelectionStrict": 44.8,
+    "toolSelectionLoose": 89.7,
+    "symbolAccuracy": 96.6,
+    "decisionAccuracy": 100,
+    "finalAnswerValidity": 96.8,
+    "gateInterceptedRate": 0,
+    "unverifiedClaimsRate": 0,
+    "invalidToolCallRate": 0,
+    "toolExecErrorRate": 1.3,
+    "avgToolCalls": 4.87,
+    "avgLlmRounds": 2.87,
+    "latencyMs": {
+      "mean": 74422,
+      "p50": 65540,
+      "p95": 163951
+    }
+  },
+  "failures": [
+    {
+      "caseId": "GA-001",
+      "turn": 0,
+      "failures": [
+        "不应调用却调用了:get_account",
+        "调用了预期外的工具:get_account"
+      ]
+    },
+    {
+      "caseId": "GA-004",
+      "turn": 0,
+      "failures": [
+        "不应调用却调用了:get_position",
+        "调用了预期外的工具:get_position"
+      ]
+    },
+    {
+      "caseId": "BA-001",
+      "turn": 0,
+      "failures": [
+        "调用了预期外的工具:get_account"
+      ]
+    },
+    {
+      "caseId": "BA-003",
+      "turn": 0,
+      "failures": [
+        "调用了预期外的工具:get_account"
+      ]
+    },
+    {
+      "caseId": "SA-002",
+      "turn": 0,
+      "failures": [
+        "调用了预期外的工具:get_trade_history"
+      ]
+    },
+    {
+      "caseId": "SA-003",
+      "turn": 0,
+      "failures": [
+        "调用了预期外的工具:get_market_context,calculate_indicators,get_stock_fundamentals"
+      ]
+    },
+    {
+      "caseId": "AP-002",
+      "turn": 0,
+      "failures": [
+        "不应调用却调用了:get_trade_history",
+        "调用了预期外的工具:get_trade_history,get_portfolio_risk_snapshot"
+      ]
+    },
+    {
+      "caseId": "RP-001",
+      "turn": 0,
+      "failures": [
+        "调用了预期外的工具:get_portfolio_risk_snapshot,get_stock_fundamentals"
+      ]
+    },
+    {
+      "caseId": "RP-002",
+      "turn": 0,
+      "failures": [
+        "调用了预期外的工具:get_stock_fundamentals,get_trade_history"
+      ]
+    },
+    {
+      "caseId": "RA-001",
+      "turn": 0,
+      "failures": [
+        "symbol=sz002594,期望 null",
+        "调用了预期外的工具:get_account"
+      ]
+    },
+    {
+      "caseId": "RA-002",
+      "turn": 0,
+      "failures": [
+        "调用了预期外的工具:get_market_context,get_account,get_portfolio_risk_snapshot"
+      ]
+    },
+    {
+      "caseId": "ED-002",
+      "turn": 0,
+      "failures": [
+        "纯问答期望零工具,实际调用了 8 次"
+      ]
+    },
+    {
+      "caseId": "ED-003",
+      "turn": 0,
+      "failures": [
+        "调用了预期外的工具:get_account,get_market_context,calculate_indicators,get_stock_fundamentals"
+      ]
+    },
+    {
+      "caseId": "MT-001",
+      "turn": 0,
+      "failures": [
+        "调用了预期外的工具:get_market_context,get_account,get_stock_quote,calculate_indicators,get_stock_fundamentals"
+      ]
+    },
+    {
+      "caseId": "MT-001",
+      "turn": 1,
+      "failures": [
+        "调用了预期外的工具:get_market_context"
+      ]
+    },
+    {
+      "caseId": "MT-002",
+      "turn": 0,
+      "failures": [
+        "调用了预期外的工具:get_market_context,get_account,get_stock_quote,get_position,calculate_indicators,get_stock_fundamentals"
+      ]
+    },
+    {
+      "caseId": "MT-002",
+      "turn": 1,
+      "failures": [
+        "调用了预期外的工具:search_stock,get_market_context"
+      ]
+    }
+  ]
+}

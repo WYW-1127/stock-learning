@@ -1,10 +1,10 @@
 # 项目状态(project-state)
 
-> **每次开发会话:开场先读我,收工必更新我。** 最后更新:2026-09-09
+> **每次开发会话:开场先读我,收工必更新我。** 最后更新:2026-09-10
 
 ## 一句话现状
 
-**AI Investment Agent 全部完成并真机验收通过**(glm-5.3-flash,七场景 S1–S7 全过)。项目 v1 + AI 功能交付。**AI 已改 SSE 流式输出**(思考过程实时显示,质量优先,单次分析约 40-90s)。**2026-09-04:已 Docker 化 + Basic Auth 口令保护,具备云服务器公网部署能力**(docs/deploy.md,待用户实际部署)。**2026-09-09:AI 纳入基本面并更名「AI Investment Agent」**(新工具 get_stock_fundamentals,新浪财务指标源,E2E 验收通过;原名"AI 教练"因用户嫌难听弃用)。
+**AI Investment Agent 全部完成并真机验收通过**(glm-5.3-flash,七场景 S1–S7 全过)。项目 v1 + AI 功能交付。**AI 已改 SSE 流式输出**(思考过程实时显示,质量优先,单次分析约 40-90s)。**2026-09-04:已 Docker 化 + Basic Auth 口令保护,具备云服务器公网部署能力**(docs/deploy.md,待用户实际部署)。**2026-09-09:AI 纳入基本面并更名「AI Investment Agent」**。**2026-09-10:建成 Agent 离线评估体系并跑出首份真实基线**(29 例/31 轮,docs/evaluation.md,Intent 100%/幻觉风险 0%)。
 
 ## 已完成
 
@@ -25,6 +25,8 @@
 - [x] **Docker 化 + 公网部署能力(2026-09-04)**:①`server/src/auth.js` Basic Auth 中间件——`AUTH_USER`+`AUTH_PASS` 都配置才启用,不配置与本地行为完全一致;`/api/meta/status` 白名单(免口令供 healthcheck);timingSafeEqual 防时序;前端零改动(浏览器缓存凭据后 fetch/SSE 同源自动带上);新增 6 单测。②多阶段 `Dockerfile`(web 构建层 → node:22-alpine 运行层,**tzdata + TZ=Asia/Shanghai 时区关键**、NODE_ENV、DATA_DIR=/data、VOLUME、非 root node 用户、镜像内预建 /data 并 chown)。③`docker-compose.yml`(./data:/data 数据卷、.env 注入口令/AI key、healthcheck、restart: unless-stopped)。④`.env.example` + .gitignore 加 .env(密钥不入库红线)。⑤`docs/deploy.md` 部署指南(路线A服务器clone构建/路线B本机save-scp-load、.env 说明、运维命令、Caddy HTTPS 可选、国内镜像加速)。⑥清理 server/web package.json 中代码从未引用的 `"stock-learning": "file:.."` 自引用依赖并重生成两份 lock(否则 Docker 内 npm ci 失败);README 加部署入口、单测数修正 76→123。**验证**:123 单测全绿;本机构建+临时容器冒烟全过——无凭据 401/错误密码 401/白名单 200/带凭据页面与 API 200/账户初始 10 万/marketOk:true/AI configured:false/**容器内时区 CST 正确(周五 12:38 判 afterHours 系午休,口径与本地一致)**/无 AUTH 容器全放行。**三个坑**:①Docker Hub 本机直连被墙 → `docker pull docker.m.daocloud.io/library/node:22-alpine` 后 tag 改名(不动用户 Docker 全局配置);②非 root 容器写匿名卷 /data 报 EACCES → 镜像内 `RUN mkdir -p /data && chown node:node /data`(bind mount 宿主目录仍需 `chown 1000:1000`,已写入 deploy.md);③一次 package.json 编辑被外部进程静默还原(疑似 npm 与编辑竞态)→ 重改后必须立即 grep 验证落盘
 
 - [x] **AI 教练纳入基本面(2026-09-09)**:①market.js 新增 `getFundamentals`——新浪财经 vFD 财务指标页(GB2312 HTML,Node fetch 直连实测通过),并行抓 当年+前两年 共 3 页(~500ms),解析出最近两个年报+最新季报列的 9 项指标(EPS/每股净资产/每股经营现金流/毛利率/净利率/ROE/营收增长率/净利增长率/资产负债率),24h 缓存;某年页空/失败跳过,全失败抛错由工具层转 error。②tools.js 第 10 个工具 `get_stock_fundamentals`(纯只读):基本面+实时 PE/PB/总市值一次拿全;工具超时按工具差异化(基本面 8s,其余 3s)。③提示词:标准分析路径加基本面工具、新铁律"买卖/持有判断必须结合基本面"、教练风格加"技术面与基本面冲突时如实分说"。④**数据坑两枚**:新浪"销售毛利率"近年停更(全 --)→ 用 100−主营业务成本率反推(茅台 2025 反推 91.18% 与真实一致,银行无成本率则 null);market.js 模块级 round2 无判空守卫(round2(null)=0)→ 解析处先 Number.isFinite 守卫。⑤**验收**:128 单测全绿(+5);工具直调平安/茅台数据合理;E2E 茅台综合分析 5 工具链含基本面、facts 数字全真、结论"基本面顶级但成长放缓+技术面偏弱"冲突如实分说、不代客交易提示在。数据源探测淘汰:腾讯 F10 无公开路径/网易 502/同花顺 403(详见 architecture.md §1 2026-09-09 条)
+
+- [x] **Agent 离线评估体系 + 首份真实基线(2026-09-10,P0-1)**:项目审计(简历视角)后落地。①`server/evals/`:cases.json 29 例/31 轮(全 intent 覆盖+实体变体[全名/拼音 byd/纯代码 600519]+未持仓卖出+零工具纯问答+不存在股票+下单安全边界+多轮防过期重查)、fixture/ 预置持仓状态(平安银行 3000 股两批+比亚迪 100 股+三笔带理由流水)、scoring.mjs 评分纯函数(单轮断言+15 项指标聚合+markdown 渲染,13 单测)、run.mjs runner(**零侵入**复用 runAgent 的 onEvent 收集实际行为;DATA_DIR 隔离;每用例前清 chat.json 实现用例间隔离;__resetThrottleForTest 复位节流;--only/--resume 断点续跑;jsonl 增量落盘)。②**首份基线**(reports/run-2026-09-10-06-34-summary.md):Intent 100%/Decision 100%/实体 96.6%/宽松工具选择 89.7%/严格 44.8%/未查先答(幻觉风险)0%/无效调用 0%/执行错误 1.3%/平均 4.87 工具 2.87 LLM 轮/延迟 74.4s·p95 164s。③**行为发现**:严格口径低全因"多调白名单外工具"(买入查账户/止盈查流水,教练视角合理但超预设白名单;无一例漏调必选工具);真缺陷两处——无意义输入被发散成 8 工具调用、多轮第二问重复 search_stock 未沿用已解析实体;RA-001 全持仓问题把 symbol 绑到风险最高一只(口径争议)。④runner 修一 bug:buildActual 漏传 toolNames 致首跑对空工具集评分。文档:docs/evaluation.md(指标定义/口径局限/跑法/真实性纪律/基线解读);.gitignore 加 fixture/chat.json;package.json 加 eval 脚本;141 单测全绿
 
 ## 下一步(按序)
 
@@ -87,3 +89,4 @@
 - 2026-09-07:用户截图反馈 AI 教练 facts 卡片排版乱(标签被挤成逐字竖排)→ 根因:`.ai-facts` 两列 grid 在 440px 抽屉里每列仅 ~170px,`.fact` 横向 flex + space-between 把标签挤压竖排;修复为单列 key-value 行(标签 `flex:0 0 auto`+nowrap+min-width 4em,值 `flex:1` 换行悬挂对齐),前端已重建 dist。IAB webview 仍未就绪,改用"最小验证页 + Edge 无头截图"完成目测验证(标签单行/列对齐/长句换行对齐全部达标),临时文件已清理
 - 2026-09-09:用户要求"AI 综合分析加上基本面" → 落地 `get_stock_fundamentals` 工具(新浪 vFD 财务指标源,3 年页并行 + 24h 缓存,最近两年报+最新季报 9 项指标 + 实时 PE/PB/市值),提示词纳入综合判断;撞坑:新浪销售毛利率停更用成本率反推、market.js round2 无判空守卫;128 单测全绿 + 工具直调与 E2E 验收通过(细节见"已完成"对应条目与 architecture.md §1)。**待用户自然验证**:前端问个股买卖问题,确认 facts 卡片出现基本面数字、结论融合两面信号
 - 2026-09-09:用户嫌"AI 教练"名字难听 → **全站更名「AI Investment Agent」**(与 spec 文档一致):前端浮动按钮/抽屉标题/欢迎语/未配置指引、系统提示词人设(【教练风格】同步改叫【表达风格】,行为不变)、README/deploy.md/api.js/index.js 注释;web dist 已重建。历史日志与 spec 中的旧称保留(如实记录当时状态)
+- 2026-09-10:用户目标升级为"打磨成可写进 AI Agent 实习简历的项目"→ 先做完整审计(架构/Agent 流程/Tool Calling/Evaluation 缺口/简历视角评价/P0-P2 路线,含"明确不加 MCP/LangGraph/Redis/向量 RAG"的判断),用户选定 P0-1 → 落地离线评估体系并跑出首份真实基线(见"已完成"对应条目)。审计报告结论:核心质量近满分,短板是"效果不可证明"与 Observability。**P0 剩余**:Trace/JSONL 日志(P0-2)、CI(P0-3);P1:Facts 数字溯源核验、会话隔离、Token 统计、API 文档

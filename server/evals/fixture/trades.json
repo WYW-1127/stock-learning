@@ -1,0 +1,41 @@
+[
+  {
+    "time": "2026-08-25 14:32:05",
+    "tradeDate": "2026-08-25",
+    "symbol": "sz000001",
+    "name": "平安银行",
+    "side": "buy",
+    "price": 10.7,
+    "qty": 2000,
+    "amount": 21400.0,
+    "fees": { "commission": 5.35, "stampTax": 0, "transferFee": 0 },
+    "note": "银行股低估值,PE不到6,先建底仓",
+    "realizedPnl": null
+  },
+  {
+    "time": "2026-09-02 09:41:12",
+    "tradeDate": "2026-09-02",
+    "symbol": "sz002594",
+    "name": "比亚迪",
+    "side": "buy",
+    "price": 260.5,
+    "qty": 100,
+    "amount": 26050.0,
+    "fees": { "commission": 6.51, "stampTax": 0, "transferFee": 0 },
+    "note": "新能源龙头,看好出海逻辑",
+    "realizedPnl": null
+  },
+  {
+    "time": "2026-09-08 10:15:40",
+    "tradeDate": "2026-09-08",
+    "symbol": "sz000001",
+    "name": "平安银行",
+    "side": "buy",
+    "price": 10.68,
+    "qty": 1000,
+    "amount": 10680.0,
+    "fees": { "commission": 5.0, "stampTax": 0, "transferFee": 0 },
+    "note": "回调加仓,摊低成本",
+    "realizedPnl": null
+  }
+]
