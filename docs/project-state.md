@@ -1,6 +1,6 @@
 # 项目状态(project-state)
 
-> **每次开发会话:开场先读我,收工必更新我。** 最后更新:2026-09-10
+> **每次开发会话:开场先读我,收工必更新我。** 最后更新:2026-09-13
 
 ## 一句话现状
 
@@ -90,3 +90,4 @@
 - 2026-09-09:用户要求"AI 综合分析加上基本面" → 落地 `get_stock_fundamentals` 工具(新浪 vFD 财务指标源,3 年页并行 + 24h 缓存,最近两年报+最新季报 9 项指标 + 实时 PE/PB/市值),提示词纳入综合判断;撞坑:新浪销售毛利率停更用成本率反推、market.js round2 无判空守卫;128 单测全绿 + 工具直调与 E2E 验收通过(细节见"已完成"对应条目与 architecture.md §1)。**待用户自然验证**:前端问个股买卖问题,确认 facts 卡片出现基本面数字、结论融合两面信号
 - 2026-09-09:用户嫌"AI 教练"名字难听 → **全站更名「AI Investment Agent」**(与 spec 文档一致):前端浮动按钮/抽屉标题/欢迎语/未配置指引、系统提示词人设(【教练风格】同步改叫【表达风格】,行为不变)、README/deploy.md/api.js/index.js 注释;web dist 已重建。历史日志与 spec 中的旧称保留(如实记录当时状态)
 - 2026-09-10:用户目标升级为"打磨成可写进 AI Agent 实习简历的项目"→ 先做完整审计(架构/Agent 流程/Tool Calling/Evaluation 缺口/简历视角评价/P0-P2 路线,含"明确不加 MCP/LangGraph/Redis/向量 RAG"的判断),用户选定 P0-1 → 落地离线评估体系并跑出首份真实基线(见"已完成"对应条目)。审计报告结论:核心质量近满分,短板是"效果不可证明"与 Observability。**P0 剩余**:Trace/JSONL 日志(P0-2)、CI(P0-3);P1:Facts 数字溯源核验、会话隔离、Token 统计、API 文档
+- 2026-09-13:GitHub 仓库门面审计与修复(用户视角:README 简陋/无截图/无架构图/配置乱/commit 乱/跑不起来/AI 代码未整理)。**审计结论**:commit 历史规整无需修、密钥零泄露(ai.json 仓库外/.env 忽略/启动.bat 未入库)、可跑性实测通过(PORT=8091 临时实例冒烟);真问题三个已修:①README 停在 v1 视角 → 全面重写(项目定位含 AI+评估、5 张界面截图、mermaid 架构图、npm/双击双路径快速开始、测试与评估节);②零截图 → Edge CDP 截图脚本(先播种 localStorage guide-tour-done 防新手引导弹窗遮挡;AiChat 加 #ai 深链接直开抽屉)产出 docs/screenshots/ 5 张(1440x900,已目测验证数据真实);③根目录 agent需求.md 原始讨论稿入库 → git mv 归档 docs/superpowers/。小修:.env.example 残留旧称"AI 教练"→AI Investment Agent。**坑**:Edge 无头 --screenshot 相对路径按自身 CWD 解析须绝对路径;全新 profile 无 localStorage 标记致引导弹窗盖屏,改走 CDP(--remote-debugging-port + Node 22 原生 WebSocket)先播种再截图

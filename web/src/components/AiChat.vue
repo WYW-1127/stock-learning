@@ -127,6 +127,7 @@ function onAsk(e) {
 onMounted(() => {
   window.addEventListener('ai-ask', onAsk);
   loadStatus();
+  if (window.location.hash === '#ai') open.value = true; // 深链接直达 AI 抽屉
 });
 onBeforeUnmount(() => window.removeEventListener('ai-ask', onAsk));
 </script>
